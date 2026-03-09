@@ -1,0 +1,1 @@
+static WCHAR *wusername, *password, *protocol, *host, *path, target[1024], *password_expiry_utc;

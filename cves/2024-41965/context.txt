@@ -1,0 +1,23 @@
+#define VIM_CLEAR(p) \
+    do { \
+	if ((p) != NULL) \
+	{ \
+	    vim_free(p); \
+	    (p) = NULL; \
+	} \
+    } while (0)
+
+void
+buf_set_name(int fnum, char_u *name)
+{
+    buf_T	*buf;
+
+    buf = buflist_findnr(fnum);
+    if (buf == NULL)
+	return;
+
+    // Allocate ffname and expand into full path.  Also resolves .lnk
+    // files on Win32.
+    fname_expand(buf, &buf->b_ffname, &buf->b_sfname);
+    buf->b_fname = buf->b_sfname;
+}
