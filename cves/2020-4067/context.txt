@@ -1,0 +1,18 @@
+static stun_buffer_list_elem *get_elem_from_buffer_list(stun_buffer_list *bufs)
+{
+	stun_buffer_list_elem *ret = NULL;
+
+	if(bufs && bufs->head && bufs->tsz) {
+
+		ret=bufs->head;
+		bufs->head=ret->next;
+		--bufs->tsz;
+
+		ret->next=NULL;
+		ret->buf.len = 0;
+		ret->buf.offset = 0;
+		ret->buf.coffset = 0;
+	}
+
+	return ret;
+}

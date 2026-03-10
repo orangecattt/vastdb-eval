@@ -1,0 +1,23 @@
+static stun_buffer_list_elem *new_blist_elem(ioa_engine_handle e)
+{
+	stun_buffer_list_elem *ret = get_elem_from_buffer_list(&(e->bufs));
+
+	if(!ret) {
+	  ret = (stun_buffer_list_elem *)malloc(sizeof(stun_buffer_list_elem));
+
+	  ret->buf.len = 0;
+	  ret->buf.offset = 0;
+	  ret->buf.coffset = 0;
+
+	  ret->next = NULL;
+
+
+
+
+
+
+
+	}
+
+	return ret;
+}

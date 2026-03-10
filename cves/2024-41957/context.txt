@@ -1,0 +1,35 @@
+/*
+ * Replacement for free() that ignores NULL pointers.
+ * Also skip free() when exiting for sure, this helps when we caught a deadly
+ * signal that was caused by a crash in free().
+ * If you want to set NULL after calling this function, you should use
+ * VIM_CLEAR() instead.
+ */
+    void
+vim_free(void *x)
+{
+    if (x != NULL && !really_exiting)
+    {
+#ifdef MEM_PROFILE
+	mem_pre_free(&x);
+#endif
+	free(x);
+    }
+}
+
+#define VIM_CLEAR(p) \
+    do { \
+	vim_free(p); \
+	(p) = NULL; \
+    } while (0)
+
+
+/*
+ * Free a single entry in a tag stack
+ */
+    void
+tagstack_clear_entry(taggy_T *item)
+{
+    VIM_CLEAR(item->tagname);
+    VIM_CLEAR(item->user_data);
+}
