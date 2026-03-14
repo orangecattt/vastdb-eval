@@ -1,3 +1,6 @@
-configs/**
-logs/**
-outputs/**
+configs/*
+!configs/.gitkeep
+logs/*
+!logs/.gitkeep
+outputs/*
+!outputs/.gitkeep
