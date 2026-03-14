@@ -1,0 +1,45 @@
+// 1. vulnerability location -> operation
+// TODO: location as key
+MATCH (n:OPERATIONS) WHERE n.location[0] = 'M' AND n.location[3] = 'ex_cmds2.c' AND n.location[4] = '202' AND n.location[7] = './macros.h' AND n.location[8] = '365' RETURN n;
++-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| n                                                                                                                                                                                 |
++-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| (:OPERATIONS {name: "hl.call", uid: 1305643, can_throw: TRUE, location: ["M", "2", "F", "ex_cmds2.c", "202", "6", "F", "./macros.h", "365", "6"], within: FALSE, cleanup: FALSE}) |
++-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+
+// 2. callee
+// 2.1. backward
+// rule per operation
+[hl.call MATCH] (:OPERATIONS {uid: 1305643})-[:ARGVALUE]->(v)<-[:RESVALUE]-(o) RETURN v, o;
+[hl.cast BitCast] MATCH (:OPERATIONS {uid: 1305487})-[:ARGVALUE]->(v)<-[:RESVALUE]-(o) RETURN v, o;
+[hl.cast LValue2RValue] MATCH (:OPERATIONS {uid: 1305485})-[:ARGVALUE]->(v)<-[:RESVALUE]-(o) RETURN v, o;
+[hl.member] MATCH (:OPERATIONS {uid: 1305483})-[:ARGVALUE]->(v)<-[:RESVALUE]-(o) RETURN v, o;
+[hl.cast LValue2RValue] MATCH (:OPERATIONS {uid: 1305481})-[:ARGVALUE]->(v)<-[:RESVALUE]-(o) RETURN v, o;
+[hl.ref] MATCH (:OPERATIONS {uid: 1305479})-[:ARGVALUE]->(v)<-[:RESVALUE]-(o) RETURN v, o;
+// general rule
+// NOTE: field in-sensitive
+MATCH (:OPERATIONS {uid: 1305643})-[:ARGVALUE {idx: 0}]->() (()<-[:RESVALUE]-()-[:ARGVALUE]->()){0,} (def_v)<-[:RESVALUE]-(def) WHERE def.name = "hl.param" OR def.name = "hl.var" OR def.name = "hl.call" RETURN def, def_v;
++------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| def                                                                                                                                         | def_v                    |
++------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| (:OPERATIONS {name: "hl.param", uid: 1305125, prime_type: "typedef buf_T *", location: ["F", "ex_cmds2.c", "160", "12"], paramName: "buf"}) | (:VALUES {uid: 1305126}) |
++------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+// 2.2 forward
+// TODO: name, func_name as key
+MATCH (:VALUES {uid: 1305126}) (()<-[:ARGVALUE]-()-[RESVALUE]->()){0,} ()<-[arg:ARGVALUE]-(call {name: "hl.call"}) 
+WHERE toInteger(call.location[2]) < 200
+WITH call, arg.idx AS arg_idx
+ORDER BY toInteger(call.location[2]) DESC
+MATCH (call)-[:ARGATTR]->(str:STRINGATTRS)
+WITH DISTINCT str.value AS callee_name, arg_idx WITH callee_name, collect(arg_idx) AS arg_idx
+MATCH (callee:OPERATIONS {name: "hl.func"}) WHERE callee.func_name = callee_name AND (callee)-[:CHILDREGION]->()-[:CHILDBLOCK]->() 
+RETURN callee.func_name, callee.location, arg_idx;
++---------------------------------------------------------------------------------------------------------------------------------+
+| callee.func_name                                                                 | callee.location                  | arg_idx   |
++---------------------------------------------------------------------------------------------------------------------------------+
+| "buf_write_all(file_buffer *, int)"                                              | ["F", "ex_cmds2.c", "450", "1"]  | [0]       |
+| "check_overwrite(exarg *, file_buffer *, unsigned char *, unsigned char *, int)" | ["F", "ex_cmds.c", "2127", "1"]  | [1, 3, 2] |
+| "buf_set_name(int, unsigned char *)"                                             | ["F", "buffer.c", "3606", "1"]   | [0]       |
+| "dialog_msg(unsigned char *, char *, unsigned char *)"                           | ["F", "ex_docmd.c", "9813", "1"] | [2]       |
++---------------------------------------------------------------------------------------------------------------------------------+
+// TODO: get macro context

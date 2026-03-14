@@ -1,0 +1,182 @@
+MATCH (n:OPERATIONS) WHERE n.location[1] CONTAINS 'window.c' AND n.location[2] = '5841' RETURN n;
+
+// 1. backward
+/* subscript 只关心idx = 0的ARGVALUE */
+/* field sensitive */
+MATCH (:OPERATIONS {uid: 4506241})-[:ARGVALUE {idx: 0}]->() (()<-[:RESVALUE]-(chain)-[:ARGVALUE {idx: 0}]->()){0,} (def_v)<-[:RESVALUE]-(def) WHERE def.name = "hl.param" OR def.name = "hl.var" OR def.name = "hl.call" RETURN def, def_v, reverse([op IN chain WHERE op.name = 'hl.member' | op.index]) AS field;
++---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| def                                                                                                                                       | def_v                    | field    |
++---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| (:OPERATIONS {name: "hl.param", uid: 4494915, prime_type: "typedef win_T *", location: ["F", "window.c", "5770", "12"], paramName: "wp"}) | (:VALUES {uid: 4494916}) | [158, 0] |
++---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+
+// 2. forward
+MATCH (:VALUES {uid: 4494916}) (()<-[:ARGVALUE]-(chain)-[RESVALUE]->()){0, 6} ()<-[:ARGVALUE]-(call {name: "hl.call"}) 
+WHERE toInteger(call.location[2]) < 5841 ORDER BY SIZE(chain) WITH call, collect(SIZE(chain))[0] AS depth
+MATCH (call)-[:ARGATTR]->(str:STRINGATTRS) WITH str.value AS callee_name, collect(depth)[0] AS depth
+MATCH (callee:OPERATIONS {name: "hl.func"}) WHERE callee.func_name = callee_name AND (callee)-[:CHILDREGION]->()-[:CHILDBLOCK]->() RETURN callee.func_name, callee.location, depth;
++------------------------------------------------------------------------------------------+
+| callee.func_name                              | callee.location                  | depth |
++------------------------------------------------------------------------------------------+
+| "clearFolding(window_S *)"                    | ["F", "fold.c", "805", "1"]      | 2     |
+| "win_free_lsize(window_S *)"                  | ["F", "window.c", "6067", "1"]   | 2     |
+| "alist_unlink(arglist *)"                     | ["F", "arglist.c", "63", "1"]    | 4     |
+| "clear_winopt($struct@<./structs.h:177:9> *)" | ["F", "option.c", "6879", "1"]   | 4     |
+| "unref_var_dict(dictvar_S *)"                 | ["F", "evalvars.c", "3704", "1"] | 4     |
+| "vim_free(void *)"                            | ["F", "alloc.c", "609", "1"]     | 6     |
+| "hash_init(hashtable_S *)"                    | ["F", "hashtab.c", "65", "1"]    | 6     |
+| "vars_clear(hashtable_S *)"                   | ["F", "evalvars.c", "3718", "1"] | 6     |
++------------------------------------------------------------------------------------------+
+
+/* field_sensitive */
+MATCH (:VALUES {uid: 4494916}) (()<-[:ARGVALUE]-(chain)-[RESVALUE]->()){0, 6} ()<-[:ARGVALUE]-(call {name: "hl.call"}) 
+WHERE toInteger(call.location[2]) < 5841
+WITH call, [op IN chain WHERE op.name = 'hl.member' | op.index] AS field, SIZE(chain) AS depth
+WHERE [158, 0][0..SIZE(field)] = field
+ORDER BY toInteger(call.location[2]) DESC 
+WITH call, collect(field) AS field, collect(depth)[0] AS depth
+MATCH (call)-[:ARGATTR]->(str:STRINGATTRS) WITH str.value AS callee_name, field, depth
+MATCH (callee:OPERATIONS {name: "hl.func"}) WHERE callee.func_name = callee_name AND (callee)-[:CHILDREGION]->()-[:CHILDBLOCK]->() RETURN callee.func_name, callee.location, field, depth;
++-------------------------------------------------------------------------------+
+| callee.func_name             | callee.location                | field | depth |
++-------------------------------------------------------------------------------+
+| "win_free_lsize(window_S *)" | ["F", "window.c", "6067", "1"] | [[]]  | 2     |
+| "clearFolding(window_S *)"   | ["F", "fold.c", "805", "1"]    | [[]]  | 2     |
++-------------------------------------------------------------------------------+
+
+// 3. find caller
+MATCH (:STRINGATTRS {value: "win_free(window_S *, tabpage_S *)"})<-[:ARGATTR]-(call {name: "hl.call"}) 
+(()<-[:CHILDINST]-()<-[:CHILDBLOCK]-()<-[:CHILDREGION]-()){1,} (caller {name: "hl.func"}) RETURN call, caller.func_name, caller.location;
++----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| call                                                                                                                                    | caller.func_name                                      | caller.location                |
++----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| (:OPERATIONS {name: "hl.call", uid: 4541105, can_throw: TRUE, location: ["F", "window.c", "5955", "5"], within: FALSE, cleanup: FALSE}) | "win_free_popup(window_S *)"                          | ["F", "window.c", "5940", "1"] |
+| (:OPERATIONS {name: "hl.call", uid: 4532518, can_throw: TRUE, location: ["F", "window.c", "1248", "6"], within: FALSE, cleanup: FALSE}) | "win_split_ins(int, int, window_S *, int, frame_S *)" | ["F", "window.c", "976", "1"]  |
+| (:OPERATIONS {name: "hl.call", uid: 4462430, can_throw: TRUE, location: ["F", "window.c", "3442", "5"], within: FALSE, cleanup: FALSE}) | "win_free_mem(window_S *, int *, tabpage_S *)"        | ["F", "window.c", "23", "15"]  |
++----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+/* TODO: hash api */
+/* TODO: static function location */
+
+// 4. backward(caller)
+// 1
+MATCH (:OPERATIONS {uid: 4541105})-[:ARGVALUE {idx: 0}]->() (()<-[:RESVALUE]-(chain)-[:ARGVALUE {idx: 0}]->()){0,} (def_v)<-[:RESVALUE]-(def) WHERE def.name = "hl.param" OR def.name = "hl.var" OR def.name = "hl.call" RETURN def, def_v, reverse([op IN chain WHERE op.name = 'hl.member' | op.index]) AS field;
++-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| def                                                                                                                                        | def_v                    | field |
++-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| (:OPERATIONS {name: "hl.param", uid: 4533963, prime_type: "typedef win_T *", location: ["F", "window.c", "5940", "23"], paramName: "win"}) | (:VALUES {uid: 4533964}) | []    |
++-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+// 2
+MATCH (:OPERATIONS {uid: 4532518})-[:ARGVALUE {idx: 0}]->() (()<-[:RESVALUE]-(chain)-[:ARGVALUE {idx: 0}]->()){0,} (def_v)<-[:RESVALUE]-(def) WHERE def.name = "hl.param" OR def.name = "hl.var" OR def.name = "hl.call" RETURN def, def_v, reverse([op IN chain WHERE op.name = 'hl.member' | op.index]) AS field;
++-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| def                                                                                                                                      | def_v                    | field |
++-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| (:OPERATIONS {name: "hl.var", uid: 4502668, variable_sizes: 0, varName: "wp", location: ["F", "window.c", "983", "12"], has_init: TRUE}) | (:VALUES {uid: 4502669}) | []    |
++-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+MATCH (:OPERATIONS {uid: 4502668})-[:CHILDREGION]->()-[:CHILDBLOCK]->()-[:CHILDINST]->(:OPERATIONS {name: "hl.value.yield"})-[:ARGVALUE {idx: 0}]->() (()<-[:RESVALUE]-(chain)-[:ARGVALUE {idx: 0}]->()){0,} (def_v)<-[:RESVALUE]-(def) WHERE def.name = "hl.param" OR def.name = "hl.var" OR def.name = "hl.call" RETURN def, def_v, reverse([op IN chain WHERE op.name = 'hl.member' | op.index]) AS field;
++---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| def                                                                                                                                          | def_v                    | field |
++---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| (:OPERATIONS {name: "hl.param", uid: 4502657, prime_type: "typedef win_T *", location: ["F", "window.c", "979", "12"], paramName: "new_wp"}) | (:VALUES {uid: 4502658}) | []    |
++---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+// 3
+MATCH (:OPERATIONS {uid: 4462430})-[:ARGVALUE {idx: 0}]->() (()<-[:RESVALUE]-(chain)-[:ARGVALUE {idx: 0}]->()){0,} (def_v)<-[:RESVALUE]-(def) WHERE def.name = "hl.param" OR def.name = "hl.var" OR def.name = "hl.call" RETURN def, def_v, reverse([op IN chain WHERE op.name = 'hl.member' | op.index]) AS field;
++-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| def                                                                                                                                        | def_v                    | field |
++-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| (:OPERATIONS {name: "hl.param", uid: 4462319, prime_type: "typedef win_T *", location: ["F", "window.c", "3430", "12"], paramName: "win"}) | (:VALUES {uid: 4462320}) | []    |
++-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+
+// 5. forward(caller)
+// 1
+MATCH (:VALUES {uid: 4533964}) (()<-[:ARGVALUE]-(chain)-[RESVALUE]->()){0,} ()<-[arg:ARGVALUE]-(call {name: "hl.call"}) 
+WHERE toInteger(call.location[2]) < 5955
+WITH call, arg.idx AS arg_idx, [op IN chain WHERE op.name = 'hl.member' | op.index] AS field
+WHERE [158, 0][0..SIZE(field)] = field
+ORDER BY toInteger(call.location[2]) DESC
+MATCH (call)-[:ARGATTR]->(str:STRINGATTRS)
+WITH DISTINCT str.value AS callee_name, arg_idx, field WITH callee_name, collect(arg_idx) AS arg_idx, collect(field) AS field
+MATCH (callee:OPERATIONS {name: "hl.func"}) WHERE callee.func_name = callee_name AND (callee)-[:CHILDREGION]->()-[:CHILDBLOCK]->() 
+RETURN callee.func_name, callee.location, arg_idx, field;
++--------------------------------------------------------------------------------------------------------------------------+
+| callee.func_name                                         | callee.location                | callee.uid | arg_idx | field |
++--------------------------------------------------------------------------------------------------------------------------+
+| "close_buffer(window_S *, file_buffer *, int, int, int)" | ["F", "buffer.c", "523", "1"]  | 507988     | [0]     | [[]]  |
+| "win_close_buffer(window_S *, int, int)"                 | ["F", "window.c", "2635", "1"] | 4511757    | [0]     | [[]]  |
++--------------------------------------------------------------------------------------------------------------------------+
+MATCH (:OPERATIONS {uid: 507988})-[:CHILDREGION]->()-[:CHILDBLOCK]->()-[:CHILDINST {idx:0}]->() (()-[:NEXTOP]->(mid WHERE mid.name <> "hl.param")){0,} ()-[:NEXTOP]->(def)-[:RESVALUE]->(def_v) RETURN def, def_v;
++--------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| def                                                                                                                                      | def_v                   |
++--------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| (:OPERATIONS {name: "hl.param", uid: 507992, prime_type: "typedef win_T *", location: ["F", "buffer.c", "524", "12"], paramName: "win"}) | (:VALUES {uid: 507993}) |
++--------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+MATCH (:VALUES {uid: 507993}) (()<-[:ARGVALUE]-(chain)-[RESVALUE]->()){0,} ()<-[arg:ARGVALUE]-(call {name: "hl.call"}) 
+WHERE toInteger(call.location[2]) < 5955
+WITH call, arg.idx AS arg_idx, [op IN chain WHERE op.name = 'hl.member' | op.index] AS field
+WHERE [158, 0][0..SIZE(field)] = field
+ORDER BY toInteger(call.location[2]) DESC
+MATCH (call)-[:ARGATTR]->(str:STRINGATTRS)
+WITH DISTINCT str.value AS callee_name, arg_idx, field WITH callee_name, collect(arg_idx) AS arg_idx, collect(field) AS field
+MATCH (callee:OPERATIONS {name: "hl.func"}) WHERE callee.func_name = callee_name AND (callee)-[:CHILDREGION]->()-[:CHILDBLOCK]->() 
+RETURN callee.func_name, callee.location, arg_idx, field;
++-----------------------------------------------------------------------------------------------------------------+
+| callee.func_name                                             | callee.location                | arg_idx | field |
++-----------------------------------------------------------------------------------------------------------------+
+| "win_valid_any_tab(window_S *)"                              | ["F", "window.c", "1665", "1"] | [0]     | [[]]  |
+| "buflist_setfpos(file_buffer *, window_S *, long, int, int)" | ["F", "buffer.c", "3115", "1"] | [1]     | [[]]  |
+| "set_last_cursor(window_S *)"                                | ["F", "mark.c", "1409", "1"]   | [0]     | [[]]  |
++-----------------------------------------------------------------------------------------------------------------+
+// 2
+MATCH (:VALUES {uid: 4502669}) (()<-[:ARGVALUE]-(chain)-[RESVALUE]->()){0,} ()<-[arg:ARGVALUE]-(call {name: "hl.call"}) 
+WHERE toInteger(call.location[2]) < 1248
+WITH call, arg.idx AS arg_idx, [op IN chain WHERE op.name = 'hl.member' | op.index] AS field
+WHERE [158, 0][0..SIZE(field)] = field
+ORDER BY toInteger(call.location[2]) DESC
+MATCH (call)-[:ARGATTR]->(str:STRINGATTRS)
+WITH DISTINCT str.value AS callee_name, arg_idx, field WITH callee_name, collect(arg_idx) AS arg_idx, collect(field) AS field
+MATCH (callee:OPERATIONS {name: "hl.func"}) WHERE callee.func_name = callee_name AND (callee)-[:CHILDREGION]->()-[:CHILDBLOCK]->() 
+RETURN callee.func_name, callee.location, arg_idx, field;
++----------------------------------------------------------------------------------------+
+| callee.func_name                     | callee.location               | arg_idx | field |
++----------------------------------------------------------------------------------------+
+| "new_frame(window_S *)"              | ["F", "window.c", "39", "13"] | [0]     | [[]]  |
+| "win_append(window_S *, window_S *)" | ["F", "window.c", "48", "13"] | [1]     | [[]]  |
++----------------------------------------------------------------------------------------+
+MATCH (:VALUES {uid: 4502658}) (()<-[:ARGVALUE]-(chain)-[RESVALUE]->()){0,} ()<-[arg:ARGVALUE]-(call {name: "hl.call"}) 
+WHERE toInteger(call.location[2]) < 1248
+WITH call, arg.idx AS arg_idx, [op IN chain WHERE op.name = 'hl.member' | op.index] AS field
+WHERE [158, 0][0..SIZE(field)] = field
+ORDER BY toInteger(call.location[2]) DESC
+MATCH (call)-[:ARGATTR]->(str:STRINGATTRS)
+WITH DISTINCT str.value AS callee_name, arg_idx, field WITH callee_name, collect(arg_idx) AS arg_idx, collect(field) AS field
+MATCH (callee:OPERATIONS {name: "hl.func"}) WHERE callee.func_name = callee_name AND (callee)-[:CHILDREGION]->()-[:CHILDBLOCK]->() 
+RETURN callee.func_name, callee.location, arg_idx, field;
++----------------------------------------------------+
+| callee.func_name | callee.location | field | depth |
++----------------------------------------------------+
++----------------------------------------------------+
+// 3
+MATCH (:VALUES {uid: 4462320}) (()<-[:ARGVALUE]-(chain)-[RESVALUE]->()){0,} ()<-[arg:ARGVALUE]-(call {name: "hl.call"}) 
+WHERE toInteger(call.location[2]) < 3442
+WITH call, arg.idx AS arg_idx, [op IN chain WHERE op.name = 'hl.member' | op.index] AS field
+WHERE [158, 0][0..SIZE(field)] = field
+ORDER BY toInteger(call.location[2]) DESC
+MATCH (call)-[:ARGATTR]->(str:STRINGATTRS)
+WITH DISTINCT str.value AS callee_name, arg_idx, field WITH callee_name, collect(arg_idx) AS arg_idx, collect(field) AS field
+MATCH (callee:OPERATIONS {name: "hl.func"}) WHERE callee.func_name = callee_name AND (callee)-[:CHILDREGION]->()-[:CHILDBLOCK]->() 
+RETURN callee.func_name, callee.location, arg_idx, field;
++------------------------------------------------------------------------------------------------------------------+
+| callee.func_name                                              | callee.location                | arg_idx | field |
++------------------------------------------------------------------------------------------------------------------+
+| "winframe_remove(window_S *, int *, tabpage_S *, frame_S **)" | ["F", "window.c", "3487", "1"] | [0]     | [[]]  |
++------------------------------------------------------------------------------------------------------------------+
+
+// root cause: first free
+// alias by global variables
+MATCH (:STRINGATTRS {value: "mark_forget_file(window_S *, int)"})<-[:ARGATTR]-(call {name: "hl.call"}) 
+(()<-[:CHILDINST]-()<-[:CHILDBLOCK]-()<-[:CHILDREGION]-()){1,} (caller {name: "hl.func"}) RETURN call, caller.func_name, caller.location;
++----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| call                                                                                                                                  | caller.func_name                                         | caller.location               |
++----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| (:OPERATIONS {name: "hl.call", uid: 541832, can_throw: TRUE, location: ["F", "buffer.c", "762", "6"], within: FALSE, cleanup: FALSE}) | "close_buffer(window_S *, file_buffer *, int, int, int)" | ["F", "buffer.c", "523", "1"] |
++----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+MATCH (:OPERATIONS {uid: 541832})-[:ARGVALUE {idx: 0}]->() (()<-[:RESVALUE]-(chain)-[:ARGVALUE {idx: 0}]->()){0,} (def_v)<-[:RESVALUE]-(def) WHERE def.name = "hl.param" OR def.name = "hl.var" OR def.name = "hl.call" RETURN def, def_v, reverse([op IN chain WHERE op.name = 'hl.member' | op.index]) AS field;

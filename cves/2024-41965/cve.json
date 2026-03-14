@@ -1,0 +1,7 @@
+{
+    "CVE-ID": "CVE-2024-41965",
+    "CWE-ID": "CWE-415: Double Free",
+    "version": "8a0bbe7",
+    "patch": "b29f4ab",
+    "location": "VIM_CLEAR(buf->b_sfname);"
+}

@@ -1,6 +1,3 @@
-/*
- * Remove window 'wp' from the window list and free the structure.
- */
     static void
 win_free(
     win_T	*wp,

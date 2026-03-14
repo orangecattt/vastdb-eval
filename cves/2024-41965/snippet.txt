@@ -80,7 +80,7 @@ dialog_changed(
 #endif
 		if (buf2->b_fname != NULL && check_overwrite(&ea, buf2,
 				  buf2->b_fname, buf2->b_ffname, FALSE) == OK)
-		    // didn't hit Cancel
+		    // didn't hit Cancel·
 		    (void)buf_write_all(buf2, FALSE);
 
 		// an autocommand may have deleted the buffer
