@@ -1,0 +1,7 @@
+{
+  "CVE-ID": "CVE-2022-3341",
+  "CWE-ID": "CWE-476 NULL Pointer Dereference",
+  "version": "n5.1 ~ n8.1-dev",
+  "patch": "https://github.com/FFmpeg/FFmpeg/commit/9cf652cef49d74afe3d454f27d49eb1a1394951e",
+  "location": "st->codecpar->codec_tag = tmp;"
+}
