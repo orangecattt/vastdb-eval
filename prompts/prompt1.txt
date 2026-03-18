@@ -2,9 +2,9 @@ Task:
 The following private C/C++ code snippet contains a vulnerability. Briefly explain why this vulnerability occurs.
 
 Requirements:
-- Explain the root cause of the vulnerability.
-- Describe the execution path that leads to the vulnerability.
-- Strictly limit the analysis to the provided code. Do not hallucinate external library behaviors.
+- Explain the root cause and the execution path of the vulnerability.
+- Strictly limit the analysis to the provided code.
+{cwe_prompt}
 
 Output format:
 A single paragraph of 1–2 concise sentences.

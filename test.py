@@ -3,6 +3,7 @@
 import argparse
 import json
 import os
+import re
 import sys
 from pathlib import Path
 from openai import OpenAI
@@ -78,7 +79,6 @@ def read_file(path: str) -> str:
     with open(path, "r", encoding="utf-8") as f:
         return f.read()
 
-
 def write_file(path: str, content: str) -> bool:
     try:
         with open(path, "w", encoding="utf-8") as f:
@@ -98,6 +98,19 @@ def load_prompt_template(path: Path) -> str | None:
         print(f"Failed to read prompt template: {path} ({exc})", file=sys.stderr)
         exit(1)
 
+def load_cwe_prompt(cwe: str, location: str) -> str:
+    with open(PROMPTS_DIR / "cwe-prompts.json", "r", encoding="utf-8") as f:
+        cwe_prompts = json.load(f)
+    m = re.match(r"CWE-(\d+)", cwe)
+    if not m:
+        print(f"Invalid CWE ID format: {cwe}", file=sys.stderr)
+        exit(1)
+    cwe_id = m.group(1)
+    if cwe_id in cwe_prompts:
+        cwe_prompt = cwe_prompts[cwe_id]
+        return cwe_prompt.format(location=location)
+    else:
+        return ""
 
 def parse_cve_file(content: str) -> tuple[str, str] | None:
     json.loads(content)
@@ -162,6 +175,7 @@ def main() -> int:
 
     output_dir = OUTPUTS_DIR / args.input_dir
     output_dir.mkdir(parents=True, exist_ok=True)
+    LOGS_DIR.mkdir(parents=True, exist_ok=True)
 
     snippet = read_file(str(snippet_path)).strip()
     context = read_file(str(context_path)).strip()
@@ -170,11 +184,13 @@ def main() -> int:
 
     explain1_template = load_prompt_template(EXPLAIN1_TEMPLATE_PATH)
     explain2_template = load_prompt_template(EXPLAIN2_TEMPLATE_PATH)
+    cwe_prompt = load_cwe_prompt(cwe_id, location)
 
     explain1_prompt = explain1_template.format(
         cwe_id=cwe_id,
         location=location,
         snippet=snippet,
+        cwe_prompt=cwe_prompt
     )
 
     explain2_prompt = explain2_template.format(

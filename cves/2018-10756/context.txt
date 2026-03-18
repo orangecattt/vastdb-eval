@@ -13,14 +13,6 @@ void* tr_realloc(void* p, size_t size)
     return result;
 }
 
-struct SaveNode
-{
-    tr_variant const* v;
-    tr_variant sorted;
-    size_t childIndex;
-    bool isVisited;
-};
-
 static void nodeConstruct(struct SaveNode* node, tr_variant const* v, bool sort_dicts)
 {
     node->isVisited = false;
@@ -62,3 +54,11 @@ static void nodeConstruct(struct SaveNode* node, tr_variant const* v, bool sort_
 
 
 }
+
+struct SaveNode
+{
+    tr_variant const* v;
+    tr_variant sorted;
+    size_t childIndex;
+    bool isVisited;
+};

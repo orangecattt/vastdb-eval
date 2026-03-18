@@ -1,0 +1,8 @@
+{
+    "CVE-ID": "CVE-2022-41860",
+    "CWE-ID": "CWE-476: NULL Pointer Dereference",
+    "project": "freeradius",
+    "version": "c240302",
+    "patch": "f1cdbb3",
+    "location": "newvp->vp_length = eapsim_len-2;"
+}

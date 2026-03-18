@@ -1,0 +1,8 @@
+{
+    "CVE-ID": "CVE-2018-10756",
+    "CWE-ID": "CWE-416: Use After Free",
+    "project": "transmission",
+    "version": "a6482b0",
+    "patch": "2123adf",
+    "location": "else if (tr_variantIsContainer(node->v) && node->childIndex < node->v->val.l.count)"
+}
