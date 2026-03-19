@@ -1,22 +1,16 @@
-static stun_buffer_list_elem *new_blist_elem(ioa_engine_handle e)
+static int send_ssl_backlog_buffers(ioa_socket_handle s)
 {
-	stun_buffer_list_elem *ret = get_elem_from_buffer_list(&(e->bufs));
-
-	if(!ret) {
-	  ret = (stun_buffer_list_elem *)malloc(sizeof(stun_buffer_list_elem));
-
-	  ret->buf.len = 0;
-	  ret->buf.offset = 0;
-	  ret->buf.coffset = 0;
-
-	  ret->next = NULL;
-
-
-
-
-
-
-
+	int ret = 0;
+	if(s) {
+		stun_buffer_list_elem *buf_elem = s->bufs.head;
+		while(buf_elem) {
+			int rc = ssl_send(s, (char*)buf_elem->buf.buf + buf_elem->buf.offset - buf_elem->buf.coffset, (size_t)buf_elem->buf.len, ((s->e) && s->e->verbose));
+			if(rc<1)
+				break;
+			++ret;
+			pop_elem_from_buffer_list(&(s->bufs));
+			buf_elem = s->bufs.head;
+		}
 	}
 
 	return ret;
