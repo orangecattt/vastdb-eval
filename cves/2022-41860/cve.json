@@ -4,5 +4,7 @@
     "project": "freeradius",
     "version": "c240302",
     "patch": "f1cdbb3",
+    "file": "src/modules/rlm_eap/libeap/eapsimlib.c",
+    "line": 341,
     "location": "newvp->vp_length = eapsim_len-2;"
 }

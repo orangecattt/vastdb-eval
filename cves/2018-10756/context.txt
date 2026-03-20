@@ -1,16 +1,9 @@
-#define tr_renew(struct_type, mem, n_structs) \
-    ((struct_type*)tr_realloc((mem), sizeof(struct_type) * (size_t)(n_structs)))
-
-void* tr_realloc(void* p, size_t size)
+void tr_free(void* p)
 {
-    void* result = size != 0 ? realloc(p, size) : NULL;
-
-    if (result == NULL)
+    if (p != NULL)
     {
-        tr_free(p);
+        free(p);
     }
-
-    return result;
 }
 
 static void nodeConstruct(struct SaveNode* node, tr_variant const* v, bool sort_dicts)
@@ -35,7 +28,6 @@ static void nodeConstruct(struct SaveNode* node, tr_variant const* v, bool sort_
 
         tr_variantInitDict(&node->sorted, n);
 
-
         for (size_t i = 0; i < n; ++i)
         {
             node->sorted.val.l.vals[i] = *tmp[i].val;
@@ -51,14 +43,161 @@ static void nodeConstruct(struct SaveNode* node, tr_variant const* v, bool sort_
     {
         node->v = v;
     }
-
-
 }
 
-struct SaveNode
+void* tr_malloc(size_t size)
 {
-    tr_variant const* v;
-    tr_variant sorted;
-    size_t childIndex;
-    bool isVisited;
-};
+    return size != 0 ? malloc(size) : NULL;
+}
+
+static void nodeDestruct(struct SaveNode* node)
+{
+    if (node->v == &node->sorted)
+    {
+        tr_free(node->sorted.val.l.vals);
+    }
+}
+
+static bool tr_variantIsContainer(tr_variant const* v)
+{
+    return tr_variantIsList(v) || tr_variantIsDict(v);
+}
+
+static inline bool tr_variantIsDict(tr_variant const* v)
+{
+    return v != NULL && v->type == TR_VARIANT_TYPE_DICT;
+}
+
+void tr_variantInitQuark(tr_variant* v, tr_quark const q)
+{
+    tr_variantInit(v, TR_VARIANT_TYPE_STR);
+    tr_variant_string_set_quark(&v->val.s, q);
+}
+
+void* tr_realloc(void* p, size_t size)
+{
+    void* result = size != 0 ? realloc(p, size) : NULL;
+
+    if (result == NULL)
+    {
+        tr_free(p);
+    }
+
+    return result;
+}
+
+static inline bool tr_logLevelIsActive(tr_log_level level)
+{
+    return tr_logGetLevel() >= level;
+}
+
+void tr_logAddMessage(char const* file, int line, tr_log_level level, char const* name, char const* fmt, ...)
+{
+    int const err = errno; /* message logging shouldn't affect errno */
+    char buf[1024];
+    int buf_len;
+    va_list ap;
+    tr_lockLock(getMessageLock());
+
+    /* build the text message */
+    *buf = '\0';
+    va_start(ap, fmt);
+    buf_len = evutil_vsnprintf(buf, sizeof(buf), fmt, ap);
+    va_end(ap);
+
+    if (buf_len < 0)
+    {
+        goto finish;
+    }
+
+#ifdef _WIN32
+
+    if ((size_t)buf_len < sizeof(buf) - 3)
+    {
+        buf[buf_len + 0] = '\r';
+        buf[buf_len + 1] = '\n';
+        buf[buf_len + 2] = '\0';
+        OutputDebugStringA(buf);
+        buf[buf_len + 0] = '\0';
+    }
+    else
+    {
+        OutputDebugStringA(buf);
+    }
+
+#endif
+
+    if (!tr_str_is_empty(buf))
+    {
+        if (tr_logGetQueueEnabled())
+        {
+            tr_log_message* newmsg;
+            newmsg = tr_new0(tr_log_message, 1);
+            newmsg->level = level;
+            newmsg->when = tr_time();
+            newmsg->message = tr_strdup(buf);
+            newmsg->file = file;
+            newmsg->line = line;
+            newmsg->name = tr_strdup(name);
+
+            *myQueueTail = newmsg;
+            myQueueTail = &newmsg->next;
+            ++myQueueLength;
+
+            if (myQueueLength > TR_LOG_MAX_QUEUE_LENGTH)
+            {
+                tr_log_message* old = myQueue;
+                myQueue = old->next;
+                old->next = NULL;
+                tr_logFreeQueue(old);
+                --myQueueLength;
+                TR_ASSERT(myQueueLength == TR_LOG_MAX_QUEUE_LENGTH);
+            }
+        }
+        else
+        {
+            tr_sys_file_t fp;
+            char timestr[64];
+
+            fp = tr_logGetFile();
+
+            if (fp == TR_BAD_SYS_FILE)
+            {
+                fp = tr_sys_file_get_std(TR_STD_SYS_FILE_ERR, NULL);
+            }
+
+            tr_logGetTimeStr(timestr, sizeof(timestr));
+
+            if (name != NULL)
+            {
+                tr_sys_file_write_fmt(fp, "[%s] %s: %s" TR_NATIVE_EOL_STR, NULL, timestr, name, buf);
+            }
+            else
+            {
+                tr_sys_file_write_fmt(fp, "[%s] %s" TR_NATIVE_EOL_STR, NULL, timestr, buf);
+            }
+
+            tr_sys_file_flush(fp, NULL);
+        }
+    }
+
+finish:
+    tr_lockUnlock(getMessageLock());
+    errno = err;
+}
+
+#define tr_new(struct_type, n_structs) \
+    ((struct_type*)tr_malloc(sizeof(struct_type) * (size_t)(n_structs)))
+
+#define tr_renew(struct_type, mem, n_structs) \
+    ((struct_type*)tr_realloc((mem), sizeof(struct_type) * (size_t)(n_structs)))
+
+#define tr_logAddNamed(level, name, ...) \
+    do \
+    { \
+        if (tr_logLevelIsActive(level)) \
+        { \
+            tr_logAddMessage(__FILE__, __LINE__, level, name, __VA_ARGS__); \
+        } \
+    } \
+    while (0)

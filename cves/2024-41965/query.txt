@@ -16,7 +16,7 @@ WHERE def.name = "hl.param" OR def.name = "hl.var" OR def.name = "hl.call" RETUR
 +------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
 // 3. forward callee
-MATCH (:VALUES {uid: 1307110}) (()<-[:ARGVALUE]-()-[RESVALUE]->()){0,} ()<-[arg:ARGVALUE]-(call {name: "hl.call"}) 
+MATCH (:VALUES {uid: 1307110}) (()<-[:ARGVALUE]-()-[:RESVALUE]->()){0,} ()<-[arg:ARGVALUE]-(call {name: "hl.call"}) 
 WHERE (call.location[0] = 'F' AND toInteger(call.location[2]) < 200) OR (call.location[0] = 'M' AND toInteger(call.location[4]) < 200)
 MATCH (call)-[:ARGATTR]->(str:STRINGATTRS)
 WITH str, collect(DISTINCT arg.idx) AS arg_idx, collect(DISTINCT call.location) AS call_locs
