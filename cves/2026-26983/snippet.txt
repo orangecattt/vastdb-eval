@@ -1,0 +1,87 @@
+      if (LocaleCompare((const char *) tag,"map") == 0)
+        {
+          Image
+            *affinity_image;
+
+          MagickBooleanType
+            dither;
+
+          QuantizeInfo
+            *quantize_info;
+
+          /*
+            Map image.
+          */
+          if (msl_info->image[n] == (Image *) NULL)
+            {
+              ThrowMSLException(OptionError,"NoImagesDefined",
+                (const char *) tag);
+              break;
+            }
+          affinity_image=NewImageList();
+          dither=MagickFalse;
+          if (attributes != (const xmlChar **) NULL)
+            for (i=0; (attributes[i] != (const xmlChar *) NULL); i++)
+            {
+              keyword=(const char *) attributes[i++];
+              attribute=InterpretImageProperties(msl_info->image_info[n],
+                msl_info->attributes[n],(const char *) attributes[i],exception);
+              CloneString(&value,attribute);
+              attribute=DestroyString(attribute);
+              switch (*keyword)
+              {
+                case 'D':
+                case 'd':
+                {
+                  if (LocaleCompare(keyword,"dither") == 0)
+                    {
+                      option=ParseCommandOption(MagickBooleanOptions,
+                        MagickFalse,value);
+                      if (option < 0)
+                        ThrowMSLException(OptionError,"UnrecognizedBooleanType",
+                          value);
+                      dither=(MagickBooleanType) option;
+                      break;
+                    }
+                  ThrowMSLException(OptionError,"UnrecognizedAttribute",
+                    keyword);
+                  break;
+                }
+                case 'I':
+                case 'i':
+                {
+                  if (LocaleCompare(keyword,"image") == 0)
+                    for (j=0; j < msl_info->n; j++)
+                    {
+                      const char
+                        *prop;
+
+                      prop=GetImageProperty(msl_info->attributes[j],"id",
+                        exception);
+                      if ((prop != (const char *) NULL)  &&
+                          (LocaleCompare(prop,value) == 0))
+                        {
+                          affinity_image=CloneImage(msl_info->image[j],0,0,
+                            MagickFalse,exception);
+                          break;
+                        }
+                    }
+                  break;
+                }
+                default:
+                {
+                  ThrowMSLException(OptionError,"UnrecognizedAttribute",
+                    keyword);
+                  break;
+                }
+              }
+            }
+          quantize_info=AcquireQuantizeInfo(msl_info->image_info[n]);
+          quantize_info->dither_method=dither != MagickFalse ?
+            RiemersmaDitherMethod : NoDitherMethod;
+          (void) RemapImages(quantize_info,msl_info->image[n],
+            affinity_image,exception);
+          quantize_info=DestroyQuantizeInfo(quantize_info);
+          affinity_image=DestroyImage(affinity_image);
+          break;
+        }
