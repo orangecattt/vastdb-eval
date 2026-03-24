@@ -51,6 +51,7 @@ class Client:
         resp = self.client.chat.completions.create(
             model=self.model,
             messages=self.messages,
+            extra_body={"thinking": {"type": "disabled"}},
         )
 
         self.usage = resp.usage
