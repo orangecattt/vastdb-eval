@@ -1,6 +1,10 @@
 {
-    "selected_model": "deepseek-v3.2",
+    "selected_model": "glm-5",
     "models": {
+        "glm-5": {
+            "api_key": "",
+            "base_url": "https://open.bigmodel.cn/api/paas/v4"
+        },
         "qwen3-coder-plus": {
             "api_key": "",
             "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1"

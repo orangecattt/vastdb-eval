@@ -37,7 +37,10 @@
 
 ## 使用说明
 
-1. 准备测试环境并配置模型（见 `configs/`）
+1. 按照示例配置文件完成配置：
+    ```bash
+   cp configs/llm_config.json.example configs/config.json
+    ```
 2. 运行测试脚本：
    ```bash
    python test.py <CVE-ID>
