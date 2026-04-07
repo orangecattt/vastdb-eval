@@ -1,6 +1,8 @@
+.vscode/*
+
 configs/*
 !configs/.gitkeep
 logs/*
 outputs/*
-.vscode/*
 cves/[!0-9]*
+outputs-example/[!0-9]*
