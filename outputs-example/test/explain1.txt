@@ -1,0 +1,1 @@
+The first free occurs via `serviceCache->put(result->actualDescriptor, result, status)`, which transfers ownership of `result` to the cache; if `status` is then set to a failure by `actualReturn->isBogus()`, the code performs a second free by explicitly calling `delete result`.
