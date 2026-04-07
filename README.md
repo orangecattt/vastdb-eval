@@ -39,7 +39,7 @@
 
 1. 按照示例配置文件完成配置：
     ```bash
-   cp configs/llm_config.json.example configs/config.json
+   cp configs/llm_config.json.example configs/llm_config.json
     ```
 2. 运行测试脚本：
    ```bash
