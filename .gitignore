@@ -5,4 +5,5 @@ configs/*
 logs/*
 outputs/*
 cves/[!0-9]*
+testcases/**/build
 outputs-example/[!0-9]*
