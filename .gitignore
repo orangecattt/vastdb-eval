@@ -4,6 +4,7 @@ configs/*
 !configs/*.example
 logs/*
 outputs/*
-cves/[!0-9]*
-testcases/**/build
+cves/*
+**/build
+**/*.o
 outputs-example/[!0-9]*
