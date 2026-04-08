@@ -1,0 +1,9 @@
+{
+    "CVE-ID": "CVE-2018-13303",
+    "CWE-ID": "CWE-476 NULL Pointer Dereference",
+    "project": "ffmpeg",
+    "version": "ed22dc2",
+    "patch": "00e8181",
+    "file": "libavcodec/ac3_parser.c",
+    "location": "init_get_bits8(&gb, buf, size);"
+}

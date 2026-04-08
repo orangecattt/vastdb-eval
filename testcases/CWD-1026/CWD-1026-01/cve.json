@@ -1,0 +1,9 @@
+{
+    "CVE-ID": "CVE-2018-1999013",
+    "CWE-ID": "CWE-416 Use After Free",
+    "project": "ffmpeg",
+    "version": "2b46ebd",
+    "patch": "a7e032a",
+    "file": "libavformat/rmdec.c",
+    "location": "strcmp(mime, \"logical-fileinfo\")"
+}
