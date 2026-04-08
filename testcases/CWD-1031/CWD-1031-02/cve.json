@@ -1,0 +1,9 @@
+{
+    "CVE-ID": "CVE-2017-1000460",
+    "CWE-ID": "CWE-476 NULL Pointer Dereference",
+    "project": "ffmpeg",
+    "version": "1f7b4f9",
+    "patch": "76f7e70",
+    "file": "libavcodec/h264dec.c",
+    "location": "init_get_bits(&gb, nal->data + 1, (nal->size - 1) * 8);"
+}

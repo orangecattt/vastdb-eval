@@ -1,0 +1,9 @@
+{
+    "CVE-ID": "CVE-2018-13302",
+    "CWE-ID": "CWE-129 Improper Validation of Array Index",
+    "project": "ffmpeg",
+    "version": "75a2db5",
+    "patch": "ed22dc2",
+    "file": "libavformat/movenc.c",
+    "location": "info->substream[hdr->substreamid].fscod = hdr->sr_code;"
+}
