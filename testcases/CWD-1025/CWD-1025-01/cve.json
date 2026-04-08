@@ -5,10 +5,6 @@
     "version": "9006190",
     "patch": "d39d4c7",
     "file": "icu4c/source/common/serv.cpp",
-    "line": 550,
-    "location": "if (U_FAILURE(status)) {delete result;",
-    "all_cves": [
-        "CWE-476 NULL Pointer Dereference",
-        "CWE-415 Double Free"
-    ]
+    "source": "(*hash->valueDeleter)(valuepointer);",
+    "sink": "if (U_FAILURE(status)) {delete result;"
 }
