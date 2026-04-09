@@ -5,5 +5,6 @@
     "version": "ed22dc2",
     "patch": "00e8181",
     "file": "libavcodec/ac3_parser.c",
-    "location": "init_get_bits8(&gb, buf, size);"
+    "source": "init_get_bits8(&gb, buf, size);",
+    "sink": "hdr->sync_word = get_bits(gbc, 16);"
 }

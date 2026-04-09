@@ -1,0 +1,10 @@
+{
+  "CVE-ID": "CVE-2022-1725",
+  "CWE-ID": "CWE-476 NULL Pointer Dereference",
+  "project": "vim",
+  "version": "dd41037",
+  "patch": "b62dc5e",
+  "file": "src/buffer.c",
+  "source": "rmp->regprog = vim_regcomp(pat, re_flags);",
+  "sink": "if (rmp->regprog->re_in_use)"
+}

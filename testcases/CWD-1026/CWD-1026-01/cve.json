@@ -5,5 +5,6 @@
     "version": "2b46ebd",
     "patch": "a7e032a",
     "file": "libavformat/rmdec.c",
-    "location": "strcmp(mime, \"logical-fileinfo\")"
+    "source": "ret = rm_read_multi(s, s->pb, st, mime);",
+    "sink": "if(mime && !strcmp(mime, \"logical-fileinfo\"))"
 }

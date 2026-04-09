@@ -5,5 +5,6 @@
     "version": "75a2db5",
     "patch": "ed22dc2",
     "file": "libavformat/movenc.c",
-    "location": "info->substream[hdr->substreamid].fscod = hdr->sr_code;"
+    "source": "hdr->substreamid = get_bits(gbc, 3);",
+    "sink": "info->substream[hdr->substreamid].fscod = hdr->sr_code;"
 }
