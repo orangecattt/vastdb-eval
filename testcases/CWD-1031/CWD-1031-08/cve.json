@@ -1,0 +1,10 @@
+{
+    "CVE-ID": "CVE-2023-1355",
+    "CWE-ID": "CWE-476 NULL Pointer Dereference",
+    "project": "vim",
+    "version": "c481ad3",
+    "patch": "d13dd30",
+    "file": "src/vim9class.c",
+    "source": "cl = rettv->vval.v_object->obj_class;",
+    "sink": "cl->class_class_function_count"
+}

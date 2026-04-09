@@ -1,0 +1,10 @@
+{
+  "CVE-ID": "CVE-2022-3109",
+  "CWE-ID": "CWE-476 NULL Pointer Dereference",
+  "project": "vim",
+  "version": "cc2b320",
+  "patch": "656cb04",
+  "file": "libavcodec/vp3.c",
+  "source": "s->edge_emu_buffer = av_malloc(9 * FFABS(s->current_frame.f->linesize[0]));",
+  "sink": "uint8_t *temp = s->edge_emu_buffer;"
+}
