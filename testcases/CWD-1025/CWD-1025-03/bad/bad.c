@@ -1,8 +1,8 @@
 // Minimal reproducible example for dialog_changed function
 // Compile with: clang++ -c bad.cpp
 
-#include <cstring>
-#include <cstdio>
+#include <string.h>
+#include <stdio.h>
 
 // ============================================================================
 // Type definitions
@@ -658,10 +658,9 @@ dialog_changed(
 	// restore to empty when write failed
 	if (empty_bufname)
 	{
-		if (buf->b_sfname != buf->b_ffname)
-		VIM_CLEAR(buf->b_sfname);
-	    buf->b_fname = NULL;
+	    VIM_CLEAR(buf->b_fname);
 	    VIM_CLEAR(buf->b_ffname);
+	    VIM_CLEAR(buf->b_sfname);
 	    unchanged(buf, TRUE, FALSE);
 	}
     }
