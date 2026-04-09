@@ -1,0 +1,10 @@
+{
+    "CVE-ID": "CVE-2024-55069",
+    "CWE-ID": "CWE-476 NULL Pointer Dereference",
+    "project": "ffmpeg",
+    "version": "1c2c70f",
+    "patch": "4cc1495",
+    "file": "libavformat/iamf_parse.c",
+    "source": "if (ambisonics_mode > 1)",
+    "sink": "if (!i && !j && audio_element->layers[0].substream_count == 1)"
+}
