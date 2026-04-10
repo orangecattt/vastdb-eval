@@ -1,0 +1,10 @@
+{
+    "CVE-ID": "CVE-2025-59734",
+    "CWE-ID": "CWE-416 Use After Free",
+    "project": "ffmpeg",
+    "version": "c41a70b",
+    "patch": "d311382",
+    "file": "libavcodec/sanm.c",
+    "source": "av_freep(&ctx->stored_frame);",
+    "sink": "uint8_t *sf = ctx->stored_frame;"
+}

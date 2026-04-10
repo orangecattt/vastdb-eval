@@ -1,0 +1,10 @@
+{
+    "CVE-ID": "CVE-2025-10256",
+    "CWE-ID": "CWE-476 NULL Pointer Dereference",
+    "project": "ffmpeg",
+    "version": "39592f2",
+    "patch": "a254624",
+    "file": "libavfilter/af_firequalizer.c",
+    "source": "s->dump_buf = av_malloc_array(s->analysis_rdft_len + 2, sizeof(*s->dump_buf));",
+    "sink": "ya = s->dump_buf[i];"
+}
