@@ -1,0 +1,10 @@
+{
+    "CVE-ID": "CVE-2025-12343",
+    "CWE-ID": "CWE-415: Double Free",
+    "project": "ffmpeg",
+    "version": "fd31df4",
+    "patch": "b8d5f65",
+    "file": "libavfilter/dnn/dnn_backend_tf.c",
+    "source": "av_freep(&lltask);",
+    "sink": "av_freep(&task);"
+}

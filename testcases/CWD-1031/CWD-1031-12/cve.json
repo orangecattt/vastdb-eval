@@ -1,0 +1,10 @@
+{
+    "CVE-ID": "CVE-2025-7700",
+    "CWE-ID": "CWE-476 NULL Pointer Dereference",
+    "project": "ffmpeg",
+    "version": "0a5ae74",
+    "patch": "35a6de1",
+    "file": "libavcodec/alsdec.c",
+    "source": "ctx->raw_mantissa[c] = av_calloc(ctx->cur_frame_length, sizeof(**ctx->raw_mantissa));",
+    "sink": "raw_mantissa[c][i] = get_bitsz(gb, nbits[i]);"
+}

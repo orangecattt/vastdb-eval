@@ -1,0 +1,10 @@
+{
+    "CVE-ID": "CVE-2025-25471",
+    "CWE-ID": "CWE-476 NULL Pointer Dereference",
+    "project": "ffmpeg",
+    "version": "8eb1d76",
+    "patch": "fd1772b",
+    "file": "libavformat/mov.c",
+    "source": "sc->stts_count = i;",
+    "sink": "if (sc->tts_data[i].duration == sc->tts_data[0].duration)"
+}
