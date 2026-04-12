@@ -1,0 +1,10 @@
+{
+    "CVE-ID": "CVE-2026-26983",
+    "CWE-ID": "CWE-476: NULL Pointer Dereference",
+    "project": "imageMagicK",
+    "version": "7.1.2-13",
+    "patch": "7cfae4d",
+    "file": "coders/msl.c",
+    "source": "affinity_image = CloneImage(msl_info->image[j], 0, 0, MagickFalse, exception);",
+    "location": "(void)RemapImages(quantize_info, msl_info->image[n], affinity_image, exception);"
+}
