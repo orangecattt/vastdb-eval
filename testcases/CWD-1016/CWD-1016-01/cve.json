@@ -1,0 +1,10 @@
+{
+    "CVE-ID": "CVE-2020-35965",
+    "CWE-ID": "CWE-787 Out-of-bounds Write",
+    "project": "ffmpeg",
+    "version": "1278f11",
+    "patch": "3e5959b",
+    "file": "libavcodec/exr.c",
+    "source": "ymin   = bytestream2_get_le32(&s->gb);",
+    "sink": "memset(ptr, 0, out_line_size);"
+}

@@ -1,0 +1,9 @@
+{
+    "CVE-ID": "CVE-2020-22056",
+    "CWE-ID": "CWE-401 Missing Release of Memory after Effective Lifetime",
+    "project": "ffmpeg",
+    "version": "feaec3b",
+    "patch": "daf2bef",
+    "file": "libavfilter/af_acrossover.c",
+    "location": "s->xover = av_calloc(inlink->channels, sizeof(*s->xover));"
+}

@@ -1,0 +1,10 @@
+{
+    "CVE-ID": "CVE-2021-33815",
+    "CWE-ID": "CWE-129 Improper Validation of Array Index",
+    "project": "ffmpeg",
+    "version": "48342aa",
+    "patch": "26d3c81",
+    "file": "libavcodec/exr.c",
+    "source": "dc_count = AV_RL64(src + 72);",
+    "sink": "av_fast_padded_malloc(&td->dc_data, &td->dc_size, FFALIGN(dest_len, 64) * 2);"
+}

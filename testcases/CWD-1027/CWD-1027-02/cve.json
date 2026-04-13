@@ -1,0 +1,9 @@
+{
+    "CVE-ID": "CVE-2020-22054",
+    "CWE-ID": "CWE-401 Missing Release of Memory after Effective Lifetime",
+    "project": "ffmpeg",
+    "version": "357f11e",
+    "patch": "673fce6",
+    "file": "libavfilter/vf_tile.c",
+    "location": "tile->out_ref = ff_get_video_buffer(outlink, outlink->w, outlink->h);"
+}

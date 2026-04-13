@@ -1,0 +1,9 @@
+{
+    "CVE-ID": "CVE-2020-22049",
+    "CWE-ID": "CWE-401 Missing Release of Memory after Effective Lifetime",
+    "project": "ffmpeg",
+    "version": "dce2e06",
+    "patch": "373c1c9",
+    "file": "libavformat/wtvdec.c",
+    "location": "AVIOContext *s = av_malloc(sizeof(AVIOContext));"
+}
