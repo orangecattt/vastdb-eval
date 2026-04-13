@@ -1097,10 +1097,10 @@ struct _DrawInfo
     *image_info;
 };
 
-extern MagickExport const char *GetMagickModule(void);
+#define GetMagickModule() __FILE__, __func__, (unsigned long)__LINE__
 extern MagickExport MagickBooleanType IsEventLogging(void);
 extern MagickExport int LogMagickEvent(const int, const char *, const char *, ...);
-extern MagickExport int ThrowMagickException(ExceptionInfo *, const char *, const int, const char *, const char *, ...);
+extern MagickExport int ThrowMagickException(ExceptionInfo *,const char *,const char *,const size_t, const ExceptionType,const char *,const char *,...);
 extern MagickExport ExceptionInfo *AcquireExceptionInfo(void);
 extern MagickExport ExceptionInfo *DestroyExceptionInfo(ExceptionInfo *);
 extern MagickExport char *DestroyString(char *);

@@ -1,0 +1,11 @@
+{
+    "CVE-ID": "CVE-2026-22770",
+    "CWE-ID": "CWE-763: Release of Invalid Pointer or Reference",
+    "project": "imageMagick",
+    "version": "7.1.2-12",
+    "patch": "3e03307",
+    "file": "MagickCore/effect.c",
+    "line": 868,
+    "source": "(void) memset(weights,0,number_threads*sizeof(*weights));",
+    "sink": "weights[i]=(double *) RelinquishMagickMemory(weights[i]);"
+}
