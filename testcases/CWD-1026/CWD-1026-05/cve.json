@@ -1,0 +1,10 @@
+{
+    "CVE-ID": "CVE-2019-14980",
+    "CWE-ID": "CWE-416: Use After Free",
+    "project": "imageMagicK",
+    "version": "7.0.8-41",
+    "patch": "c5d012a",
+    "file": "MagickCore/blob.c",
+    "source": "(void) UnmapBlob(blob_info->data,blob_info->length);",
+    "sink": "blob=RelinquishMagickMemory(blob);"
+}
