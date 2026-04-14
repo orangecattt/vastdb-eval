@@ -1,0 +1,10 @@
+{
+    "CVE-ID": "CVE-2024-24266",
+    "CWE-ID": "CWE-416 Use After Free",
+    "project": "gpac",
+    "version": "0ff4062",
+    "patch": "",
+    "file": "gpac/src/filters/dasher.c",
+    "source": "else if (value->type==GF_PROP_STRING_NO_COPY) gf_free(value->value.string);",
+    "sink": "if (!strcmp(segext, \"m3u8\")) {"
+}
