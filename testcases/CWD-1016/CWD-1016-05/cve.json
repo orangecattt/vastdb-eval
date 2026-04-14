@@ -1,0 +1,10 @@
+{
+    "CVE-ID": "CVE-2020-22032",
+    "CWE-ID": "CWE-787 Out-of-bounds Write",
+    "project": "ffmpeg",
+    "version": "f069a9c",
+    "patch": "de598f8",
+    "file": "libavfilter/vf_edgedetect.c",
+    "source": "plane->width      = AV_CEIL_RSHIFT(inlink->w, hsub);",
+    "sink": "dst[1] = src[1];"
+}

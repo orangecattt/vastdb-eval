@@ -1,0 +1,10 @@
+{
+    "CVE-ID": "CVE-2020-22033",
+    "CWE-ID": "CWE-787 Out-of-bounds Write",
+    "project": "ffmpeg",
+    "version": "4c1afa2",
+    "patch": "82ad1b7",
+    "file": "libavfilter/vf_vmafmotion.c",
+    "source": "s->width = w;",
+    "sink": "s->vmafdsp.convolution_y(s->filter, 5, ref->data[0], s->temp_data,"
+}
