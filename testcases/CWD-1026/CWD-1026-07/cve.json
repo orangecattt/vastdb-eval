@@ -1,0 +1,10 @@
+{
+    "CVE-ID": "CVE-2024-24265",
+    "CWE-ID": "CWE-416 Use After Free",
+    "project": "gpac",
+    "version": "11067ea",
+    "patch": "f4b3e4d,c1b9c79",
+    "file": "src/scene_manager/loader_xmt.c",
+    "source": "gf_free(iod);",
+    "sink": "if (l->od && !l->od->objectDescriptorID) {"
+}
