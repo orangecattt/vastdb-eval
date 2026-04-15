@@ -1,0 +1,10 @@
+{
+    "CVE-ID": "CVE-2020-22029",
+    "CWE-ID": "CWE-787 Out-of-bounds Write",
+    "project": "ffmpeg",
+    "version": "e923e62",
+    "patch": "a7fd127",
+    "file": "libavfilter/vf_colorconstancy.c",
+    "source": "s->gauss[i] = av_mallocz_array(filtersize, sizeof(*s->gauss[i]));",
+    "sink": "gauss[GINDX(filtersize, g)]"
+}

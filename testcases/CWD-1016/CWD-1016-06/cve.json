@@ -1,0 +1,10 @@
+{
+    "CVE-ID": "CVE-2020-22031",
+    "CWE-ID": "CWE-787 Out-of-bounds Write",
+    "project": "ffmpeg",
+    "version": "0b56723",
+    "patch": "0e68e8c",
+    "file": "libavfilter/vf_w3fdif.c",
+    "source": "s->planeheight[0] = s->planeheight[3] = inlink->h;",
+    "sink": "*work_line    = *in_lines_cur[0]++ * coef[0];"
+}

@@ -1,0 +1,10 @@
+{
+    "CVE-ID": "CVE-2020-22030",
+    "CWE-ID": "CWE-787 Out-of-bounds Write",
+    "project": "ffmpeg",
+    "version": "de598f8",
+    "patch": "e1b89c7",
+    "file": "libavfilter/af_afade.c",
+    "source": "nb_samples = ff_inlink_queued_samples(ctx->inputs[0]) - s->nb_samples;",
+    "sink": "s->crossfade_samples(out->extended_data, cf[0]->extended_data,"
+}

@@ -1,0 +1,10 @@
+{
+    "CVE-ID": "CVE-2020-22025",
+    "CWE-ID": "CWE-787 Out-of-bounds Write",
+    "project": "ffmpeg",
+    "version": "4f4334b",
+    "patch": "ccf4ab8",
+    "file": "libavfilter/vf_edgedetect.c",
+    "source": "const int height     = plane->height;",
+    "sink": "memcpy(dst, src, w); dst += dst_linesize; src += src_linesize;"
+}

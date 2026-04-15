@@ -1,0 +1,10 @@
+{
+    "CVE-ID": "CVE-2020-22027",
+    "CWE-ID": "CWE-787 Out-of-bounds Write",
+    "project": "ffmpeg",
+    "version": "1331e00",
+    "patch": "e787f8f",
+    "file": "libavfilter/vf_neighbor.c",
+    "source": "td.in = in;",
+    "sink": "int limit = FFMAX(AV_RN16A(&p1[2 * x]) - threshold, 0);"
+}
