@@ -1,5 +1,5 @@
 {
-    "CVE-ID": "CVE-2024-24265",
+    "CVE-ID": "CVE-2024-6064",
     "CWE-ID": "CWE-416 Use After Free",
     "project": "gpac",
     "version": "11067ea",

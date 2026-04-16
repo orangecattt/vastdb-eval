@@ -1,0 +1,10 @@
+{
+    "CVE-ID": "CVE-2024-6063",
+    "CWE-ID": "CWE-415 Null Pointer Dereference",
+    "project": "gpac",
+    "version": "31e499d",
+    "patch": "8767ed0",
+    "file": "src/filters/dmx_m2ts.c",
+    "source": "gf_m2ts_gather_section(ts, ts->pat, NULL, &hdr, data, payload_size);",
+    "sink": "u32 count = gf_list_count(pck->stream->program->streams);"
+}
