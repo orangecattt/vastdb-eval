@@ -1,0 +1,10 @@
+{
+    "CVE-ID": "CVE-2022-47093",
+    "CWE-ID": "CWE-415 Null Pointer Dereference",
+    "project": "gpac",
+    "version": "706111f",
+    "patch": "6ddedfb",
+    "file": "src/filters/dmx_m2ts.c",
+    "source": "pmt->program->pmt_iod = NULL;",
+    "sink": "count = gf_list_count(stream->program->pmt_iod->ESDescriptors);"
+}
