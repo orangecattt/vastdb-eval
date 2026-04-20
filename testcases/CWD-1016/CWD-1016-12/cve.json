@@ -1,0 +1,9 @@
+{
+    "CVE-ID": "CVE-2022-2000",
+    "CWE-ID": "CWE-787 Out-of-bounds Write",
+    "project": "vim",
+    "version": "1f89abf",
+    "patch": "44a3f33",
+    "file": "src/eval.c",
+    "location": "STRCAT(IObuff, \": \");"
+}
