@@ -1,0 +1,10 @@
+{
+    "CVE-ID": "CVE-2023-3012",
+    "CWE-ID": "CWE-415 Null Pointer Dereference",
+    "project": "gpac",
+    "version": "8f3088b",
+    "patch": "53387aa",
+    "file": "src/utils/xml_parser.c",
+    "source": "GF_SAFEALLOC(ent, XML_Entity);",
+    "sink": "u32 nl_size = (u32) strlen(string);"
+}
