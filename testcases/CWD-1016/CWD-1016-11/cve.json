@@ -1,0 +1,9 @@
+{
+    "CVE-ID": "CVE-2023-0054",
+    "CWE-ID": "CWE-787 Out-of-bounds Write",
+    "project": "vim",
+    "version": "c32949b",
+    "patch": "3ac1d97",
+    "file": "src/eval.c",
+    "location": "STRCPY(dest, eval_result[nested]);"
+}
