@@ -1,0 +1,10 @@
+{
+    "CVE-ID": "CVE-2024-24260",
+    "CWE-ID": "CWE-416 Use After Free",
+    "project": "media-server",
+    "version": "0d60f4d",
+    "patch": "fef6242",
+    "file": "libsip/src/uac/sip-uac-subscribe.c",
+    "source": "free(subscribe);",
+    "sink": "assert(1 == subscribe->ref);"
+}
