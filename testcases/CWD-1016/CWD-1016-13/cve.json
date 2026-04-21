@@ -1,0 +1,9 @@
+{
+    "CVE-ID": "CVE-2025-69419",
+    "CWE-ID": "CWE-787 Out-of-bounds Write",
+    "project": "openssl",
+    "version": "d4f988c",
+    "patch": "ff62893",
+    "file": "crypto/asn1/a_strex.c",
+    "location": "asclen += j;"
+}

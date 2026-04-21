@@ -1,0 +1,9 @@
+{
+    "CVE-ID": "CVE-2025-15467",
+    "CWE-ID": "CWE-787 Out-of-bounds Write",
+    "project": "openssl",
+    "version": "c716aca",
+    "patch": "d0071a0",
+    "file": "crypto/evp/evp_lib.c",
+    "location": "ret = asn1_type_get_int_oct(atmp->oct, atmp->num, num, data, max_len);"
+}
