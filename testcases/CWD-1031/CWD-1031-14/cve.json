@@ -1,6 +1,6 @@
 {
     "CVE-ID": "CVE-2024-6063",
-    "CWE-ID": "CWE-415 Null Pointer Dereference",
+    "CWE-ID": "CWE-476 Null Pointer Dereference",
     "project": "gpac",
     "version": "31e499d",
     "patch": "8767ed0",

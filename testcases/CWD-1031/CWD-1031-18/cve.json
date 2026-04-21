@@ -1,0 +1,10 @@
+{
+    "CVE-ID": "CVE-2021-3236",
+    "CWE-ID": "CWE-476 Null Pointer Dereference",
+    "project": "vim",
+    "version": "17d015b",
+    "patch": "797e63b",
+    "file": "src/buffer.c",
+    "source": "win->w_buffer = NULL;",
+    "sink": "close_buffer(prevbuf == curwin->w_buffer ? curwin : NULL, prevbuf,"
+}
