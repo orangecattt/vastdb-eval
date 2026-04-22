@@ -1,0 +1,10 @@
+{
+    "CVE-ID": "CVE-2025-64335",
+    "CWE-ID": "CWE-476 Null Pointer Dereference",
+    "project": "suricata",
+    "version": "ee3900f",
+    "patch": "c935f08",
+    "file": "src/detect-entropy.c",
+    "source": "return res ? res->name : NULL;",
+    "sink": "SCLogDebug(\"registering: name %s type %u\", name, type);"
+}
