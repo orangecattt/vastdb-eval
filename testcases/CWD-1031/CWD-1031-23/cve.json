@@ -1,0 +1,10 @@
+{
+    "CVE-ID": "CVE-2025-63744",
+    "CWE-ID": "CWE-476 Null Pointer Dereference",
+    "project": "radare2",
+    "version": "6c5df3f",
+    "patch": "e37e15d",
+    "file": "libr/bin/p/bin_dyldcache.c",
+    "source": "return (RIODesc *)r_id_storage_get (&io->files, fd);",
+    "sink": "const char * io_plugin_name = bf->rbin->iob.desc_get (bf->rbin->iob.io, bf->fd)->plugin->meta.name;"
+}
