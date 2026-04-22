@@ -1,0 +1,9 @@
+{
+    "CVE-ID": "CVE-2025-9230",
+    "CWE-ID": "CWE-787 Out-of-bounds Write",
+    "project": "openssl",
+    "version": "74d92a3",
+    "patch": "5965ea5",
+    "file": "crypto/cms/cms_pwri.c",
+    "location": "memcpy(out, tmp + 4, *outlen);"
+}
