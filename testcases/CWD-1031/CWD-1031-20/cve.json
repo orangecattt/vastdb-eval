@@ -1,0 +1,10 @@
+{
+    "CVE-ID": "CVE-2022-36186",
+    "CWE-ID": "CWE-476 Null Pointer Dereference",
+    "project": "gpac",
+    "version": "ace672a",
+    "patch": "b43f9d1",
+    "file": "src/filters/reframe_nalu.c",
+    "src": "ctx->opid = NULL;",
+    "sink": "PID_IS_INPUT(pid)"
+}
