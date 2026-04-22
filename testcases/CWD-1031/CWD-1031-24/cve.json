@@ -1,0 +1,9 @@
+{
+    "CVE-ID": "CVE-2025-63745",
+    "CWE-ID": "CWE-476 Null Pointer Dereference",
+    "project": "radare2",
+    "version": "0984df0",
+    "patch": "6c5df3f",
+    "file": "libr/bin/format/ne/ne.c",
+    "location": "for (i = 0; i < bin->ne_header->SegCount; i++)"
+}
