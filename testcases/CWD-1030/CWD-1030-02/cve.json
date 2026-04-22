@@ -1,0 +1,10 @@
+{
+    "CVE-ID": "CVE-2025-69651",
+    "CWE-ID": "CWE-763: Release of Invalid Pointer or Reference",
+    "project": "binutils-gdb",
+    "version": "66a3492",
+    "patch": "ea4bc02",
+    "file": "binutils/readelf.c",
+    "source": "if (!slurp_rela_relocs (filedata, rel_offset, rel_size, &rels, &rel_size)) \\ return false;",
+    "sink": "free (all_relocations_root[j].r_symbol);"
+}
