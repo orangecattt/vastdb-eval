@@ -1,0 +1,10 @@
+{
+    "CVE-ID": "CVE-2025-69649",
+    "CWE-ID": "CWE-476 Null Pointer Dereference",
+    "project": "binutils-gdb",
+    "version": "66a3492",
+    "patch": "8e992cc",
+    "file": "binutils/readelf.c",
+    "src": "filedata->section_headers = (Elf_Internal_Shdr *) cmalloc (num, sizeof (Elf_Internal_Shdr));",
+    "sink": "relocation_type rel_type = rel_type_from_sh_type (section->sh_type);"
+}
