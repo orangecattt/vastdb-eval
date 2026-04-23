@@ -337,7 +337,7 @@ int sip_dialog_release(struct sip_dialog_t* dialog);
 int sip_dialog_remove(struct sip_agent_t* sip, struct sip_dialog_t* dialog);
 const struct cstring_t* sip_message_get_header_by_name(const struct sip_message_t* msg, const char* name);
 
-/* === Original content from bad.c === */
+
 
 struct sip_subscribe_t* sip_subscribe_internal_fetch(struct sip_agent_t* sip, const struct sip_message_t* msg, const struct cstring_t* event, int uac, int* added)
 {

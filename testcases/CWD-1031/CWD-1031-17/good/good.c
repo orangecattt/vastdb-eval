@@ -11,7 +11,7 @@
 #include <string.h>
 #include <assert.h>
 
-/* ========== Basic Types ========== */
+
 typedef uint64_t u64; typedef int64_t s64;
 typedef uint32_t u32; typedef int32_t s32;
 typedef uint16_t u16; typedef int16_t s16;
@@ -25,7 +25,7 @@ typedef struct { s32 num; u32 den; } GF_Fraction;
 typedef struct { s64 num; u64 den; } GF_Fraction64;
 #define GF_SAFEALLOC(__ptr, __struct) { (__ptr) = (__struct *) gf_malloc(sizeof(__struct)); if (__ptr) { memset((void *) (__ptr), 0, sizeof(__struct)); } }
 
-/* ========== Log Types ========== */
+
 typedef enum { GF_LOG_QUIET = 0, GF_LOG_ERROR, GF_LOG_WARNING, GF_LOG_INFO, GF_LOG_DEBUG } GF_LOG_Level;
 typedef enum { GF_LOG_CORE = 0, GF_LOG_CODING, GF_LOG_CONTAINER, GF_LOG_MEDIA, GF_LOG_FILTER, GF_LOG_ALL } GF_LOG_Tool;
 void gf_log_lt(GF_LOG_Level ll, GF_LOG_Tool lt);
@@ -34,13 +34,13 @@ void gf_log_check_error(GF_LOG_Level ll, GF_LOG_Tool lt);
 void gf_log(const char *fmt, ...);
 #define GF_LOG(_log_level, _log_tools, __args) if (gf_log_tool_level_on(_log_tools, _log_level)) { gf_log_lt(_log_level, _log_tools); gf_log __args ;}
 
-/* ========== List Types ========== */
+
 typedef struct _tag_array GF_List;
 GF_List *gf_list_new(void); void gf_list_del(GF_List *ptr); u32 gf_list_count(const GF_List *ptr);
 void *gf_list_get(const GF_List *ptr, u32 item); GF_Err gf_list_add(GF_List *ptr, void* item);
 void *gf_list_pop_front(GF_List *ptr); void *gf_list_pop_back(GF_List *ptr);
 
-/* ========== BitStream Types ========== */
+
 typedef struct __tag_bitstream GF_BitStream;
 enum { GF_BITSTREAM_READ = 0, GF_BITSTREAM_WRITE, GF_BITSTREAM_WRITE_DYN };
 GF_BitStream *gf_bs_new(const u8 *buffer, u64 size, u32 mode); void gf_bs_del(GF_BitStream *bs);
@@ -54,7 +54,7 @@ void gf_bs_read_data(GF_BitStream *bs, u8 *data, u32 size);
 u64 gf_bs_get_position(GF_BitStream *bs); void gf_bs_skip_bytes(GF_BitStream *bs, u64 nbBytes);
 char *gf_bs_read_utf8(GF_BitStream *bs);
 
-/* ========== Sync Layer Types ========== */
+
 typedef struct {
     u8 tag; u8 predefined; u8 useAccessUnitStartFlag; u8 useAccessUnitEndFlag;
     u8 useRandomAccessPointFlag; u8 hasRandomAccessUnitsOnlyFlag; u8 usePaddingFlag;
@@ -66,7 +66,7 @@ typedef struct {
     Bool no_dts_signaling; u32 carousel_version;
 } GF_SLConfig;
 
-/* ========== MPEG-4 ODF Types ========== */
+
 #define BASE_DESCRIPTOR u8 tag;
 typedef struct { BASE_DESCRIPTOR } GF_Descriptor;
 typedef struct {
@@ -81,7 +81,7 @@ enum { GF_ODF_IOD_TAG = 0x02 };
 GF_Descriptor *gf_odf_desc_new(u8 tag); void gf_odf_desc_del(GF_Descriptor *desc);
 GF_Err gf_odf_parse_descriptor(GF_BitStream *bs, GF_Descriptor **desc, u32 *size);
 
-/* ========== Filter Types ========== */
+
 typedef struct __gf_filter_pid GF_FilterPid; typedef struct __gf_filter_pck GF_FilterPacket;
 typedef struct __gf_prop_val GF_PropertyValue;
 typedef struct __gf_dec_spec_info { u32 dataLength; u8 *data; } GF_DecSpecificInfo;
@@ -103,14 +103,14 @@ GF_Err gf_filter_pid_set_property(GF_FilterPid *pid, u32 prop_4cc, const GF_Prop
 GF_Err gf_filter_pck_set_property(GF_FilterPacket *pck, u32 prop_4cc, const GF_PropertyValue *v);
 GF_Err gf_filter_pck_send(GF_FilterPacket *pck);
 
-/* ========== Network/Memory ========== */
+
 u64 gf_net_get_utc_ts(u16 year, u8 month, u8 day, u8 hour, u8 minute, u8 second);
 void *gf_malloc(size_t size); void *gf_free(void *ptr); void *gf_realloc(void *ptr, size_t size);
 const char *gf_opts_get_bool(const char *sec, const char *key);
 #define GF_4CC(a,b,c,d) ((((u32)a)<<24)|(((u32)b)<<16)|(((u32)c)<<8)|((u32)d))
 const char *gf_4cc_to_str(u32 type);
 
-/* ========== MPEG-TS Types ========== */
+
 #define GF_M2TS_MAX_STREAMS 8192
 typedef struct __m2ts_demux_section { u8 *data; u32 data_size; } GF_M2TS_Section;
 typedef struct GF_M2TS_SectionFilter {

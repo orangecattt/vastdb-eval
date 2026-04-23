@@ -1,5 +1,3 @@
-
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <stddef.h>
@@ -361,6 +359,14 @@ extern FILE *_bfd_real_fopen (const char *, const char *);
 extern char *bfd_strdup (const char *str);
 extern const bfd_target *bfd_find_target (const char *target_name, bfd *abfd);
 extern int bfd_pef_parse_loader_header (bfd *, unsigned char *, size_t, bfd_pef_loader_header *);
+static int bfd_pef_parse_traceback_tables(bfd *abfd, asection *sec,
+                                          unsigned char *buf, size_t len,
+                                          long *nsym, asymbol **csym);
+static int bfd_pef_parse_function_stubs(bfd *abfd, asection *codesec,
+                                        unsigned char *codebuf, size_t codelen,
+                                        unsigned char *loaderbuf,
+                                        size_t loaderlen, unsigned long *nsym,
+                                        asymbol **csym);
 
 /* bfd_is_thin_archive */
 static inline bfd_boolean
@@ -677,55 +683,76 @@ bfd_malloc (bfd_size_type size)
   return ptr;
 }
 
-int
-bfd_pef_scan_start_address (bfd *abfd)
+static long
+bfd_pef_parse_symbols (bfd *abfd, asymbol **csym)
 {
-  struct bfd_pef_loader_header header;
-  asection *section;
+  unsigned long count = 0;
+
+  asection *codesec = NULL;
+  unsigned char *codebuf = NULL;
+  size_t codelen = 0;
 
   asection *loadersec = NULL;
   unsigned char *loaderbuf = NULL;
   size_t loaderlen = 0;
-  int ret;
+
+  codesec = bfd_get_section_by_name (abfd, "code");
+  if (codesec != NULL)
+    {
+      codelen = codesec->size;
+      codebuf = bfd_malloc (codelen);
+      if (bfd_seek (abfd, codesec->filepos, SEEK_SET) < 0)
+	goto end;
+      if (bfd_bread ((void *) codebuf, codelen, abfd) != codelen)
+	goto end;
+    }
 
   loadersec = bfd_get_section_by_name (abfd, "loader");
-  if (loadersec == NULL)
-    goto end;
+  if (loadersec != NULL)
+    {
+      loaderlen = loadersec->size;
+      loaderbuf = bfd_malloc (loaderlen);
+      if (bfd_seek (abfd, loadersec->filepos, SEEK_SET) < 0)
+	goto end;
+      if (bfd_bread ((void *) loaderbuf, loaderlen, abfd) != loaderlen)
+	goto end;
+    }
 
-  loaderlen = loadersec->size;
-  loaderbuf = bfd_malloc (loaderlen);
-  if (bfd_seek (abfd, loadersec->filepos, SEEK_SET) < 0)
-    goto error;
-  if (bfd_bread ((void *) loaderbuf, loaderlen, abfd) != loaderlen)
-    goto error;
+  count = 0;
+  if (codesec != NULL)
+    {
+      long ncount = 0;
+      bfd_pef_parse_traceback_tables (abfd, codesec, codebuf, codelen,
+				      &ncount, csym);
+      count += ncount;
+    }
 
-  if (loaderlen < 56)
-    goto error;
-  ret = bfd_pef_parse_loader_header (abfd, loaderbuf, 56, &header);
-  if (ret < 0)
-    goto error;
+  if ((codesec != NULL) && (loadersec != NULL))
+    {
+      unsigned long ncount = 0;
+      bfd_pef_parse_function_stubs
+	(abfd, codesec, codebuf, codelen, loaderbuf, loaderlen, &ncount,
+	 (csym != NULL) ? (csym + count) : NULL);
+      count += ncount;
+    }
 
-  if (header.main_section < 0)
-    goto end;
-
-  for (section = abfd->sections; section != NULL; section = section->next)
-    if ((long) (section->index + 1) == header.main_section)
-      break;
-
-  if (section == NULL)
-    goto error;
-
-  abfd->start_address = section->vma + header.main_offset;
+  if (csym != NULL)
+    csym[count] = NULL;
 
  end:
-  if (loaderbuf != NULL)
-    free (loaderbuf);
-  return 0;
+  if (codebuf != NULL)
+    free (codebuf);
 
- error:
   if (loaderbuf != NULL)
     free (loaderbuf);
-  return -1;
+
+  return count;
+}
+
+static long
+bfd_pef_count_symbols (bfd *abfd)
+{
+  return bfd_pef_parse_symbols (abfd, NULL);
 }
 
 bfd_boolean
@@ -827,8 +854,8 @@ bfd_openr (const char *filename, const char *target)
   return bfd_fopen (filename, target, FOPEN_RB, -1);
 }
 
-int
-test (const char *filename)
+static long
+bfd_pef_get_symtab_upper_bound (const char *filename)
 {
   bfd *abfd;
 
@@ -836,5 +863,5 @@ test (const char *filename)
   if (abfd == NULL)
     return -1;
 
-  return bfd_pef_scan_start_address (abfd);
+  return bfd_pef_count_symbols (abfd);
 }

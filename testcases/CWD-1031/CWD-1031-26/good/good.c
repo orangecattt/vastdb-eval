@@ -1,4 +1,4 @@
-/* === DEPENDENCIES === */
+
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -570,7 +570,7 @@ static const struct bfd_iovec cache_iovec =
   &cache_bclose, &cache_bflush, &cache_bstat, &cache_bmmap
 };
 
-/* === ORIGINAL CODE === */
+
 
 static file_ptr
 cache_bread (struct bfd *abfd, void *buf, file_ptr nbytes)

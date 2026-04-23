@@ -1,0 +1,10 @@
+{
+    "CVE-ID": "CVE-2020-35495",
+    "CWE-ID": "CWE-476 Null Pointer Dereference",
+    "project": "binutils-gdb",
+    "version": "a232201",
+    "patch": "7a0fb7b",
+    "file": "bfd/cache.c",
+    "source": "ptr = malloc (sz);",
+    "sink": "chunk_nread = cache_bread_1 (f, (char *) buf + nread, chunk_size);"
+}
