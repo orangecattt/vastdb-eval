@@ -1,0 +1,10 @@
+{
+    "CVE-ID": "CVE-2022-35206",
+    "CWE-ID": "CWE-476 Null Pointer Dereference",
+    "project": "binutils-gdb",
+    "version": "9544899",
+    "patch": "e98e7d9",
+    "file": "binutils/dwarf.c",
+    "source": "? debug_information + unit : NULL;",
+    "sink": "debug_info_p->str_offsets_base));"
+}
