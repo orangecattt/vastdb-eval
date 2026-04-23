@@ -1,0 +1,10 @@
+{
+    "CVE-ID": "CVE-2020-16592",
+    "CWE-ID": "CWE-416 Use After Free",
+    "project": "binutils-gdb",
+    "version": "7ecb515",
+    "patch": "0ca4866",
+    "file": "bfd/hash.c",
+    "source": "free (obj_coff_strings (abfd));",
+    "sink": "&& strcmp (hashp->string, string) == 0)"
+}

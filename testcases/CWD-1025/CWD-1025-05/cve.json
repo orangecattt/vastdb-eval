@@ -1,0 +1,10 @@
+{
+    "CVE-ID": "CVE-2020-16590",
+    "CWE-ID": "CWE-415: Double Free",
+    "project": "binutils-gdb",
+    "version": "c98a454",
+    "patch": "6a05414",
+    "file": "binutils/readelf.c",
+    "source": "free (chains); \\ buckets = NULL;",
+    "sink": "free (chains); \\ chains = NULL;"
+}
