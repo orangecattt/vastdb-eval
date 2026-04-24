@@ -1,0 +1,10 @@
+{
+    "CVE-ID": "CVE-2023-49275",
+    "CWE-ID": "CWE-476 Null Pointer Dereference",
+    "project": "wazuh",
+    "version": "097d854",
+    "patch": "48cbce8",
+    "file": "src/analysisd/decoders/syscollector.c",
+    "source": "return get_object_item(object, string, false);",
+    "sink": "scan_time->valuestring,"
+}
