@@ -1,0 +1,10 @@
+{
+    "CVE-ID": "CVE-2018-10373",
+    "CWE-ID": "CWE-476 Null Pointer Dereference",
+    "project": "binutils-gdb",
+    "version": "e9301e7",
+    "patch": "6327533",
+    "file": "bfd/dwarf2.c",
+    "source": "unit = (struct comp_unit *) bfd_zalloc (abfd, amt);",
+    "sink": "if (file - 1 >= table->num_files)"
+}

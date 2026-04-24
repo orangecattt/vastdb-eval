@@ -167,7 +167,7 @@ static int iterate_demangle_function (struct work_stuff *, const char **, string
 static int demangle_prefix (struct work_stuff *, const char **, string *);
 static int gnu_special (struct work_stuff *, const char **, string *);
 
-//% cleanup, assign
+
 /* Delete dynamic stuff in work_stuff that is not to be re-used.  */
 
 static void
@@ -304,7 +304,7 @@ remember_Btype (struct work_stuff *work, const char *start,
   work -> btypevec[index] = tem;
 }
 
-//% null.assign
+
 static int
 demangle_class_name (struct work_stuff *work, const char **mangled,
                      string *declp)
@@ -1049,7 +1049,7 @@ gnu_special (struct work_stuff *work, const char **mangled, string *declp)
   return (success);
 }
 
-//% null.deref
+
 static void
 work_stuff_copy_to_from (struct work_stuff *to, struct work_stuff *from)
 {
