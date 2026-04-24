@@ -1,0 +1,10 @@
+{
+    "CVE-ID": "CVE-2025-64169",
+    "CWE-ID": "CWE-476 Null Pointer Dereference",
+    "project": "wazuh",
+    "version": "cb67d4f",
+    "patch": "b20328e",
+    "file": "src/analysisd/decoders/syscheck.c",
+    "source": "memset(&oldsum, 0, sizeof(sk_sum_t));",
+    "sink": "if (!*newsum->md5 || !*oldsum->md5 || strcmp(newsum->md5, oldsum->md5) == 0) {"
+}
