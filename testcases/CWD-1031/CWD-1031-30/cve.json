@@ -1,0 +1,10 @@
+{
+    "CVE-ID": "CVE-2020-16593",
+    "CWE-ID": "CWE-476 Null Pointer Dereference",
+    "project": "binutils-gdb",
+    "version": "aec72fd",
+    "patch": "0ca4866",
+    "file": "bfd/dwarf2.c",
+    "source": "var = (struct varinfo *) bfd_zalloc (abfd, amt);",
+    "sink": "var->file = strdup (spec_var->file);"
+}

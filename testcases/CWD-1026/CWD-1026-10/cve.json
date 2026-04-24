@@ -1,0 +1,10 @@
+{
+    "CVE-ID": "CVE-2018-20623",
+    "CWE-ID": "CWE-416: Use After Free",
+    "project": "binutils-gdb",
+    "version": "d820d0c",
+    "patch": "28e817c",
+    "file": "binutils/readelf.c",
+    "source": "free (qualified_name);",
+    "sink": "vfprintf (stderr, message, args);"
+}
