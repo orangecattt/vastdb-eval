@@ -1,0 +1,9 @@
+{
+    "CVE-ID": "CVE-2025-62791",
+    "CWE-ID": "CWE-476 Null Pointer Dereference",
+    "project": "wazuh",
+    "version": "2afb3e9",
+    "patch": "4196caf",
+    "file": "src/analysisd/decoders/ciscat.c",
+    "location": "msg_type = cJSON_GetObjectItem(logJSON, \"type\")->valuestring;"
+}

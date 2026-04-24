@@ -1,0 +1,9 @@
+{
+    "CVE-ID": "CVE-2025-62785",
+    "CWE-ID": "CWE-476 Null Pointer Dereference",
+    "project": "wazuh",
+    "version": "5651905",
+    "patch": "17f8dc2",
+    "file": "src/analysisd/decoders/plugins/json_decoder.c",
+    "location": "os_strdup(value, lf->srcip);"
+}
