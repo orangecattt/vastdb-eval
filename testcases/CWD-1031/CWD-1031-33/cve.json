@@ -1,0 +1,10 @@
+{
+    "CVE-ID": "CVE-2018-17794",
+    "CWE-ID": "CWE-476: NULL Pointer Dereference",
+    "project": "binutils-gdb",
+    "version": "0876cb1",
+    "patch": "e96d1d8",
+    "file": "libiberty/cplus-dem.c",
+    "source": "work -> btypevec[ret] = NULL;",
+    "sink": "int len = strlen (from->btypevec[i]) + 1;"
+}
