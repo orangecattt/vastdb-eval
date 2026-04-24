@@ -1,0 +1,10 @@
+{
+    "CVE-ID": "CVE-2017-12448",
+    "CWE-ID": "CWE-416: Use After Free",
+    "project": "binutils-gdb",
+    "version": "f0ac238",
+    "patch": "a22cd6f",
+    "file": "bfd/cache.c",
+    "source": "free(abfd);",
+    "sink": "if (abfd->iovec != &cache_iovec)"
+}
