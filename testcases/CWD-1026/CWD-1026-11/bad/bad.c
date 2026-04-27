@@ -1,4 +1,4 @@
-/* === Dependency declarations (must come before original code) === */
+
 
 #include <stddef.h>
 #include <stdio.h>
@@ -495,7 +495,7 @@ static inline void _maybe_make_executable(bfd *abfd) {
   }
 }
 
-/* === Original bad.c content === */
+
 #define BFD_SEND(bfd, message, arglist) ((*((bfd)->xvec->message))arglist)
 #define bfd_ardata(bfd) ((bfd)->tdata.aout_ar_data)
 #define arch_eltdata(bfd) ((struct areltdata *)((bfd)->arelt_data))

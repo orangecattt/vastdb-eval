@@ -1,4 +1,4 @@
-/* === Dependency Declarations === */
+
 
 #include <stdlib.h>
 #include <string.h>

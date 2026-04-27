@@ -942,7 +942,7 @@ struct section_add {
 /* TABLE_SIZE macro */
 #define TABLE_SIZE(TABLE) (sizeof(TABLE) / sizeof(TABLE[0]))
 
-/* Original content from bad.c */
+
 #define NAME(x, y) CONCAT3(x, _32_, y)
 
 #define MOVE_ADDRESS(ad)                                                       \

@@ -1,0 +1,10 @@
+{
+    "CVE-ID": "CVE-2017-17123",
+    "CWE-ID": "CWE-476 Null Pointer Dereference",
+    "project": "binutils-gdb",
+    "version": "f6f1d33",
+    "patch": "4581a1c",
+    "file": "bfd/coffcode.h",
+    "source": "reloc_count = bfd_canonicalize_reloc(abfd, sec, relocs, NULL);",
+    "sink": "ptr = *(cache_ptr->sym_ptr_ptr);"
+}
