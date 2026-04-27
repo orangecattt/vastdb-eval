@@ -1,0 +1,10 @@
+{
+    "CVE-ID": "CVE-2018-7642",
+    "CWE-ID": "CWE-476: NULL Pointer Dereference",
+    "project": "binutils-gdb",
+    "version": "889be5d",
+    "patch": "116acb2",
+    "file": "bfd/aoutx.h",
+    "source": "cache_ptr->sym_ptr_ptr = symbols + r_index;",
+    "sink": "asection *output_section = sym->section->output_section;"
+}

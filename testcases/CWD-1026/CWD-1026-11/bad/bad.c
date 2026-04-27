@@ -567,7 +567,7 @@ void _bfd_unlink_from_archive_parent(bfd *abfd) {
   }
 }
 
-//% free
+
 static void _bfd_delete_bfd(bfd *abfd) {
   if (abfd->memory) {
     bfd_hash_table_free(&abfd->section_htab);
@@ -772,7 +772,7 @@ static void display_any_bfd(bfd *file, int level) {
     display_object_bfd(file);
 }
 
-//% use
+
 bfd_boolean bfd_cache_close(bfd *abfd) {
   if (abfd->iovec != &cache_iovec)
     return TRUE;
@@ -882,7 +882,7 @@ bfd_boolean bfd_close(bfd *abfd) {
   return ret;
 }
 
-//% caller
+
 static void display_file(char *filename, char *target, bfd_boolean last_file) {
   bfd *file;
 
