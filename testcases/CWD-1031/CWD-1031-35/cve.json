@@ -1,0 +1,10 @@
+{
+    "CVE-ID": "CVE-2025-59148",
+    "CWE-ID": "CWE-476 Null Pointer Dereference",
+    "project": "suricata",
+    "version": "e62eb00",
+    "patch": "9f32550",
+    "file": "src/detect-entropy.c",
+    "source": "det_ctx->p = NULL;",
+    "sink": "FlowVarAddFloat(det_ctx->p->flow, ded->fv_idx, entropy);"
+}
