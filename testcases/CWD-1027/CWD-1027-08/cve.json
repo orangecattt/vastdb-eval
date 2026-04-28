@@ -1,0 +1,10 @@
+{
+    "CVE-ID": "CVE-2020-22037",
+    "CWE-ID": "CWE-401 Missing Release of Memory after Effective Lifetime",
+    "project": "ffmpeg",
+    "version": "318e184",
+    "patch": "7bba0dd",
+    "file": "libavcodec/frame_thread_encoder.c",
+    "source": "AVCodecContext *thread_avctx = avcodec_alloc_context3(avctx->codec);",
+    "sink": "return -1;"
+}
