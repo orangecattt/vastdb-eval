@@ -1,0 +1,10 @@
+{
+    "CVE-ID": "CVE-2025-25469",
+    "CWE-ID": "CWE-401 Missing Release of Memory after Effective Lifetime",
+    "project": "ffmpeg",
+    "version": "b88fc4e",
+    "patch": "d5873be",
+    "file": "libavformat/iamf_parse.c",
+    "source": "param = av_iamf_param_definition_alloc(type, nb_subblocks, &param_size);",
+    "sink": "return AVERROR_INVALIDDATA;"
+}
