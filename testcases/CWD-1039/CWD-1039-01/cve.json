@@ -1,0 +1,10 @@
+{
+    "CVE-ID": "CVE-2017-15022",
+    "CWE-ID": "CWE-476 Null Pointer Dereference",
+    "project": "binutils-gdb",
+    "version": "c361faa",
+    "patch": "11855d8",
+    "file": "bfd/dwarf2.c",
+    "source": "var->name = attr.u.str;",
+    "sink": "while ((c = *s++) != '\\0') {"
+}
