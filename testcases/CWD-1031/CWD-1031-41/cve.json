@@ -1,0 +1,10 @@
+{
+    "CVE-ID": "CVE-2018-10535",
+    "CWE-ID": "CWE-476 Null Pointer Dereference",
+    "project": "binutils-gdb",
+    "version": "aa4a8c2",
+    "patch": "db0c309",
+    "file": "bfd/elf.c",
+    "source": "memset(&((struct section_hash_entry *)entry)->section, 0, sizeof(asection));",
+    "sink": "(sym->section->output_section->owner == abfd &&"
+}
