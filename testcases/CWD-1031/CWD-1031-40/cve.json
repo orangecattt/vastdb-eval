@@ -1,0 +1,10 @@
+{
+    "CVE-ID": "CVE-2017-14974",
+    "CWE-ID": "CWE-476 Null Pointer Dereference",
+    "project": "binutils-gdb",
+    "version": "ea2fdc5",
+    "patch": "e70c19e",
+    "file": "bfd/elf64-x86-64.c",
+    "source": "*storage = NULL;",
+    "sink": "if (got_vma == p->address && p->howto != NULL &&"
+}
