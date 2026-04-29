@@ -1,0 +1,10 @@
+{
+    "CVE-ID": "CVE-2025-5245",
+    "CWE-ID": "CWE-476 NULL Pointer Dereference",
+    "project": "binutils-gdb",
+    "version": "236cf2b",
+    "patch": "049a706",
+    "file": "binutils/debug.c",
+    "source": "t = debug_xzalloc(info, sizeof(*t));",
+    "sink": "if (t1->u.kenum->names == NULL)"
+}
