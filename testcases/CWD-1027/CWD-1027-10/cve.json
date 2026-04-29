@@ -1,0 +1,10 @@
+{
+    "CVE-ID": "CVE-2022-33105",
+    "CWE-ID": "CWE-401 Missing Release of Memory after Effective Lifetime",
+    "project": "redis",
+    "version": "00a9d6b",
+    "patch": "4a7a4e4",
+    "file": "src/t_stream.c",
+    "source": "streamIteratorStart(&si,s,NULL,NULL,!first);",
+    "sink": "return;"
+}
