@@ -1,0 +1,10 @@
+{
+    "CVE-ID": "CVE-2018-18309",
+    "CWE-ID": "CWE-119 Improper Restriction of Operations within the Bounds of a Memory Buffer",
+    "project": "binutils-gdb",
+    "version": "2bf2bf2",
+    "patch": "0930cb3",
+    "file": "bfd/reloc.c",
+    "source": "p = data + (*parent)->address * bfd_octets_per_byte(input_bfd);",
+    "sink": "bfd_get_8 (abfd, data);"
+}
