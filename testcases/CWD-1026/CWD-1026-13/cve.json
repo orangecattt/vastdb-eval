@@ -1,0 +1,10 @@
+{
+    "CVE-ID": "CVE-2022-35164",
+    "CWE-ID": "CWE-416 Use After Free",
+    "project": "libredwg",
+    "version": "f2dea29",
+    "patch": "69dcecd",
+    "file": "src/bits.c",
+    "source": "dat->chain = (unsigned char *)realloc (dat->chain, dat->size + size);",
+    "sink": "byte = dat->chain[dat->byte];"
+}
