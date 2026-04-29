@@ -1,0 +1,10 @@
+{
+    "CVE-ID": "CVE-2025-55157",
+    "CWE-ID": "CWE-416 Use After Free",
+    "project": "vim",
+    "version": "681f1c9",
+    "patch": "1307743",
+    "file": "src/eval.c",
+    "source": "tuple_free(tuple);",
+    "sink": "ret = eval_tuple(arg, rettv, evalarg, TRUE);"
+}
