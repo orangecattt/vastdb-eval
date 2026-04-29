@@ -1,0 +1,10 @@
+{
+    "CVE-ID": "CVE-2025-5244",
+    "CWE-ID": "CWE-476 NULL Pointer Dereference",
+    "project": "binutils-gdb",
+    "version": "binutils-2_44",
+    "patch": "d145893",
+    "file": "bfd/elflink.c",
+    "source": "new_contents = output_section->contents;",
+    "sink": "nwrite = fwrite(from, 1, nbytes, f);"
+}
