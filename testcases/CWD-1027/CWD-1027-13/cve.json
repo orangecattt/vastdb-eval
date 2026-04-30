@@ -1,0 +1,10 @@
+{
+    "CVE-ID": "CVE-2024-24258",
+    "CWE-ID": "CWE-401 Missing Release of Memory after Effective Lifetime",
+    "project": "freeglut",
+    "version": "8925b8a",
+    "patch": "a3810f4",
+    "file": "src/fg_menu.c",
+    "source": "menuEntry = ( SFG_MenuEntry * )calloc( sizeof( SFG_MenuEntry ), 1 );",
+    "sink": "fgError(\"Menu manipulation not allowed while menus in use.\");"
+}
