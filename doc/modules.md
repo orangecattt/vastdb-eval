@@ -18,7 +18,7 @@
    node scripts/opencode_runner.mjs results/<stage>/opencode_request.json
    ```
 
-3. `opencode_runner.mjs` 读取请求，启动 opencode server/session，调用 `session.prompt()`，再把完整 runner result 以一行 JSON 输出到 stdout。
+3. `opencode_runner.mjs` 读取请求，启动 opencode server/session，订阅 `event.subscribe()` 实时事件，调用 `session.prompt()`，再把完整 runner result 以一行 JSON 输出到 stdout。
 4. `run_eval.py` 从 stdout 中解析 runner result，抽取最终答案、usage 和诊断信息，写入 `output.txt`/`output.json` 和 `log.json`。
 
 Python 不直接 import opencode SDK；Node runner 不负责 Docker、CMake、测试用例选择或最终日志格式。
@@ -206,14 +206,20 @@ Node runner 是一个很薄的 SDK 适配层。它不理解测试用例，也不
 6. 查询 MCP 状态：`client.mcp.status(query)`。
 7. 创建 session：`client.session.create({ ...query, title })`。
 8. 记录 tool listing 和 skills。
-9. 构造 prompt body：
+9. 如果 request 提供 `realtime` 路径，启动 `client.event.subscribe(query)`：
+   - 原始事件写入 `realtime_events.jsonl`。
+   - 根据 `message.part.updated` 判断 part 是否可落盘，写入 `step-start`、`step-finish` 和已结束的 part 到 `realtime_messages.jsonl`。
+   - `message.part.delta` 的 text 增量追加到 `realtime_output.txt`。
+   - 单条 event 解析失败只记录到 `realtime.errors`，不影响 `session.prompt()` 结果。
+10. 构造 prompt body：
    - `parts: [{ type: "text", text: request.prompt }]`
    - 可选 `agent`
    - 可选 `format`
-10. 调用 `client.session.prompt(...)`。
-11. 调用 `client.session.messages(...)` 取完整消息列表。
-12. 打印一行 JSON runner result。
-13. 在 `finally` 中关闭 opencode server。
+11. 调用 `client.session.prompt(...)`。
+12. 调用 `client.session.messages(...)` 取完整消息列表。
+13. 停止实时事件订阅。
+14. 打印一行 JSON runner result。
+15. 在 `finally` 中关闭 opencode server。
 
 成功返回的 runner result 包含：
 
@@ -228,6 +234,7 @@ Node runner 是一个很薄的 SDK 适配层。它不理解测试用例，也不
 - `mcp_status`
 - `tool_listing`
 - `skills`
+- `realtime`
 - `response`
 - `messages`
 

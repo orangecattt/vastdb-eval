@@ -677,6 +677,11 @@ def run_agent(
         "config": opencode_config,
         "port": free_local_port(),
         "timeout": 30000,
+        "realtime": {
+            "events": str(result_dir / "realtime_events.jsonl"),
+            "text": str(result_dir / "realtime_output.txt"),
+            "messages": str(result_dir / "realtime_messages.jsonl"),
+        },
     }
     if format_config is not None:
         request["format"] = format_config
@@ -717,6 +722,7 @@ def run_agent(
             "mcp_status": runner_result.get("mcp_status"),
             "tool_listing": runner_result.get("tool_listing"),
             "skills": runner_result.get("skills"),
+            "realtime": runner_result.get("realtime"),
             "response": runner_result.get("response"),
             "messages": runner_result.get("messages"),
             "error": runner_result.get("error"),
