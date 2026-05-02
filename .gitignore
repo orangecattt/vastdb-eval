@@ -1,6 +1,7 @@
 .vscode/*
 .agents/*
 .codex
+!.opencode/skills/*
 
 configs/*
 !configs/*.example

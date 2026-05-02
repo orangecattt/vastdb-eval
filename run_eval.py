@@ -41,6 +41,7 @@ DEFAULT_NEO4J_IMAGE = "neo4j:latest"
 CONTAINER_PREFIX = "vastdb-eval"
 PROGRESS_LOG_LOCK = threading.Lock()
 EAST_8 = dt.timezone(dt.timedelta(hours=8))
+VAST_BITCODE_FAILURE_MARKER = "Failed to generate bitcode"
 
 
 class EvalError(Exception):
@@ -371,23 +372,40 @@ def docker_inspect_running(container: str) -> bool | None:
     return proc.stdout.strip().lower() == "true"
 
 
-def wait_for_port(port: int, timeout_seconds: int = 90) -> dict[str, Any]:
+def wait_for_neo4j_ready(case: TestCase, timeout_seconds: int = 90) -> dict[str, Any]:
     started = time.monotonic()
     deadline = time.monotonic() + timeout_seconds
     attempts = 0
+    cmd = [
+        "cypher-shell",
+        "-a",
+        f"bolt://localhost:{case.bolt_port}",
+        "RETURN 1",
+    ]
+    last_result: dict[str, Any] | None = None
     while time.monotonic() < deadline:
         attempts += 1
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
-            sock.settimeout(1)
-            if sock.connect_ex(("127.0.0.1", port)) == 0:
-                return {
-                    "port": port,
-                    "timeout_seconds": timeout_seconds,
-                    "attempts": attempts,
-                    "elapsed_seconds": round(time.monotonic() - started, 3),
-                }
+        proc = run_process(cmd, ROOT, timeout=5)
+        last_result = {
+            "returncode": proc.returncode,
+            "stdout": proc.stdout,
+            "stderr": proc.stderr,
+        }
+        if proc.returncode == 0:
+            return {
+                "container": case.container,
+                "bolt_port": case.bolt_port,
+                "command": cmd,
+                "timeout_seconds": timeout_seconds,
+                "attempts": attempts,
+                "elapsed_seconds": round(time.monotonic() - started, 3),
+                **last_result,
+            }
         time.sleep(1)
-    raise EvalError("docker", f"Neo4j bolt port did not become ready: {port}")
+    raise EvalError(
+        "docker",
+        f"Neo4j readiness check failed for {case.container} after {timeout_seconds}s: {last_result}",
+    )
 
 
 def free_local_port() -> int:
@@ -400,8 +418,8 @@ def ensure_neo4j(case: TestCase, cfg: dict[str, Any]) -> bool:
     running = docker_inspect_running(case.container)
     append_run_record(case, "docker_inspect", {"container": case.container, "running": running})
     if running is True:
-        wait_result = wait_for_port(case.bolt_port)
-        append_run_record(case, "docker_wait_port", wait_result)
+        wait_result = wait_for_neo4j_ready(case)
+        append_run_record(case, "docker_wait_ready", wait_result)
         return False
     if running is False:
         cmd = ["docker", "start", case.container]
@@ -413,8 +431,8 @@ def ensure_neo4j(case: TestCase, cfg: dict[str, Any]) -> bool:
         )
         if proc.returncode != 0:
             raise EvalError("docker", f"failed to start {case.container}: {proc.stderr.strip()}")
-        wait_result = wait_for_port(case.bolt_port)
-        append_run_record(case, "docker_wait_port", wait_result)
+        wait_result = wait_for_neo4j_ready(case)
+        append_run_record(case, "docker_wait_ready", wait_result)
         return False
 
     image = str(cfg.get("neo4j_image") or DEFAULT_NEO4J_IMAGE)
@@ -451,8 +469,8 @@ def ensure_neo4j(case: TestCase, cfg: dict[str, Any]) -> bool:
     )
     if proc.returncode != 0:
         raise EvalError("docker", f"failed to create {case.container}: {proc.stderr.strip()}")
-    wait_result = wait_for_port(case.bolt_port)
-    append_run_record(case, "docker_wait_port", wait_result)
+    wait_result = wait_for_neo4j_ready(case)
+    append_run_record(case, "docker_wait_ready", wait_result)
     return True
 
 
@@ -497,15 +515,84 @@ def write_database(case: TestCase, cfg: dict[str, Any]) -> None:
     ]
     configure_env = dict(vast_env)
     configure_env["WLLVM_CONFIGURE_ONLY"] = "1"
-    proc = run_process(configure, case.work, env=configure_env)
+    configure_env["VAST_OUTPUT_FILE"] = str(case.work / "build" / "wllvm.log")
+    proc, _ = run_database_process(case, "configure", configure, configure_env)
     if proc.returncode != 0:
         raise EvalError("db", f"cmake configure failed:\n{proc.stderr or proc.stdout}")
 
     build_env = dict(vast_env)
     build_env["VASTDB_NEO4J_ADDRESS"] = f"neo4j:@localhost:{case.bolt_port}"
-    proc = run_process(["cmake", "--build", "build"], case.work, env=build_env)
+    build_env["VAST_OUTPUT_FILE"] = str(case.work / "build" / "wllvm.log")
+    proc, failure_reason = run_database_process(case, "build", ["cmake", "--build", "build"], build_env)
     if proc.returncode != 0:
         raise EvalError("db", f"cmake build/database write failed:\n{proc.stderr or proc.stdout}")
+    if failure_reason:
+        raise EvalError("db", f"cmake build/database write failed: {failure_reason}")
+
+
+def run_database_process(
+    case: TestCase,
+    step: str,
+    command: list[str],
+    env: dict[str, str],
+) -> tuple[subprocess.CompletedProcess[str], str | None]:
+    base_record = {
+        "step": step,
+        "command": command,
+        "cwd": str(case.work),
+        "env": env,
+    }
+    try:
+        proc = run_process(command, case.work, env=env)
+    except BaseException as exc:
+        append_run_record(
+            case,
+            f"write_database_{step}",
+            {
+                **base_record,
+                "error_type": type(exc).__name__,
+                "error": str(exc),
+            },
+        )
+        raise
+    failure_reason = database_failure_reason(step, env, proc)
+    result_record = {
+        **base_record,
+        "returncode": proc.returncode,
+        "stdout": proc.stdout,
+        "stderr": proc.stderr,
+    }
+    if failure_reason:
+        result_record["failure_reason"] = failure_reason
+    append_run_record(
+        case,
+        f"write_database_{step}",
+        result_record,
+    )
+    return proc, failure_reason
+
+
+def database_failure_reason(
+    step: str,
+    env: dict[str, str],
+    proc: subprocess.CompletedProcess[str],
+) -> str | None:
+    if step != "build" or proc.returncode != 0:
+        return None
+    output_file = env.get("VAST_OUTPUT_FILE")
+    if not output_file:
+        return None
+    return vast_bitcode_failure_reason(output_file)
+
+
+def vast_bitcode_failure_reason(path_value: str) -> str | None:
+    try:
+        for line in Path(path_value).read_text(encoding="utf-8", errors="replace").splitlines():
+            if VAST_BITCODE_FAILURE_MARKER in line:
+                return f"{path_value} contains '{VAST_BITCODE_FAILURE_MARKER}': {line}"
+    except OSError:
+        return None
+    return None
 
 
 def normalize_command(value: Any, default: list[str]) -> list[str]:
@@ -1003,7 +1090,6 @@ def run_case(case: TestCase, cfg: dict[str, Any]) -> dict[str, Any]:
         if created_container:
             try:
                 run_progress_stage(case, "write database", lambda: write_database(case, cfg))
-                append_run_record(case, "write_database_success", {"container": case.container})
             except BaseException:
                 remove_result = remove_neo4j(case)
                 container_removed = True

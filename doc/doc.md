@@ -121,9 +121,11 @@ http = 45000 + (<CWD-ID> - 1000) * 100 + <ID>
 
 容器处理逻辑：
 
-- 容器已运行：直接复用，并等待 bolt 端口可连接。
-- 容器存在但未运行：执行 `docker start`，再等待 bolt 端口。
-- 容器不存在：执行 `docker run -d` 创建，再等待 bolt 端口。
+- 容器已运行：直接复用，并等待 Neo4j readiness check 通过。
+- 容器存在但未运行：执行 `docker start`，再等待 Neo4j readiness check 通过。
+- 容器不存在：执行 `docker run -d` 创建，再等待 Neo4j readiness check 通过。
+
+readiness check 使用 host 上的 `cypher-shell -a bolt://localhost:<bolt_port> "RETURN 1"`。只有该查询成功后，脚本才会继续执行后续阶段。
 
 `docker run` 会把 `configs/env.json` 中的 `neo4j` 字段展开为 `-e KEY=VALUE`，并固定设置 `-e NEO4J_AUTH=none`。镜像默认是 `neo4j:latest`，可用 `configs/env.json` 顶层 `neo4j_image` 字段覆盖。
 
@@ -142,13 +144,17 @@ configure 阶段会合并 `configs/env.json` 的 `vast` 字段，并额外设置
 
 ```text
 WLLVM_CONFIGURE_ONLY=1
+VAST_OUTPUT_FILE=$work/build/wllvm.log
 ```
 
 build 阶段同样会合并 `configs/env.json` 的 `vast` 字段，并额外设置：
 
 ```text
 VASTDB_NEO4J_ADDRESS=neo4j:@localhost:<bolt_port>
+VAST_OUTPUT_FILE=$work/build/wllvm.log
 ```
+
+build 阶段的成功判定不只依赖 `cmake --build build` 的返回码。脚本还会读取 `VAST_OUTPUT_FILE`；如果其中出现 `Failed to generate bitcode`，即使 CMake 返回 0，也判定数据库写入失败。
 
 ## Agent 配置
 
@@ -364,14 +370,17 @@ $work/results/run/run.json
 - `docker_inspect`
 - `docker_start`
 - `docker_run`
-- `docker_wait_port`
-- `write_database_success`
+- `docker_wait_ready`
+- `write_database_configure`
+- `write_database_build`
 - `write_database_skip`
 - `docker_rm`
 - `docker_stop`
 - `failure`
 
 事件时间使用东八区。
+
+写数据库相关事件会记录 `command`、`cwd`、传给子进程的 `env` 覆盖项，以及 `returncode`、`stdout`、`stderr`；如果 build 阶段通过 `VAST_OUTPUT_FILE` 发现 bitcode 生成失败，还会记录 `failure_reason`；如果命令被异常打断，则记录 `error_type` 和 `error`。
 
 ### progress.log
 
