@@ -23,7 +23,7 @@
   - `*.json.example`：可提交的示例配置。
   - `*.json`：本机真实配置，包含密钥或本机路径，默认被 `.gitignore` 忽略。
 - `prompts/`：baseline、vastdb、judge 的 prompt 和 judge schema。
-- `skills/`：VAST DB schema skill。
+- `.opencode/skills/`：VAST DB schema skill。
 - `doc/`：说明文档。
   - [doc/doc.md](doc/doc.md)：实验需求、运行方式、输入输出。
   - [doc/modules.md](doc/modules.md)：脚本结构和维护入口。
