@@ -125,7 +125,7 @@ http = 45000 + (<CWD-ID> - 1000) * 100 + <ID>
 - 容器存在但未运行：执行 `docker start`，再等待 bolt 端口。
 - 容器不存在：执行 `docker run -d` 创建，再等待 bolt 端口。
 
-`docker run` 会把 `configs/env.json` 中的 `neo4j` 字段展开为 `-e KEY=VALUE`。镜像默认是 `neo4j:latest`，可用 `configs/env.json` 顶层 `neo4j_image` 字段覆盖。
+`docker run` 会把 `configs/env.json` 中的 `neo4j` 字段展开为 `-e KEY=VALUE`，并固定设置 `-e NEO4J_AUTH=none`。镜像默认是 `neo4j:latest`，可用 `configs/env.json` 顶层 `neo4j_image` 字段覆盖。
 
 ## 数据库写入
 

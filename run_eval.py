@@ -419,6 +419,7 @@ def ensure_neo4j(case: TestCase, cfg: dict[str, Any]) -> bool:
 
     image = str(cfg.get("neo4j_image") or DEFAULT_NEO4J_IMAGE)
     docker_env = stringify_env(cfg.get("neo4j", {}) if isinstance(cfg.get("neo4j"), dict) else {})
+    docker_env["NEO4J_AUTH"] = "none"
     cmd = [
         "docker",
         "run",
