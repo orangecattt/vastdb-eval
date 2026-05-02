@@ -167,7 +167,7 @@ opencode 会先按自身规则加载本地或全局配置，再叠加 SDK 传入
 vastdb 阶段会在加载 `configs/opencode_vastdb.json` 后注入：
 
 ```text
-mcp.loc-mcp-server.environment.NEO4J_URL=bolt://localhost:<bolt_port>
+mcp.loc-mcp-server.environment.NEO4J_URI=bolt://localhost:<bolt_port>
 ```
 
 `apiKey`、`baseURL` 和静态 provider 配置写在各阶段 opencode config 中。
