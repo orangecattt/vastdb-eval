@@ -36,6 +36,8 @@ VASTDB_TEMPLATE = PROMPTS_DIR / "vastdb.md"
 JUDGE_TEMPLATE = PROMPTS_DIR / "judge.md"
 JUDGE_SCHEMA = PROMPTS_DIR / "judge_schema.json"
 OPENCODE_RUNNER = ROOT / "scripts" / "opencode_runner.mjs"
+SUMMARY_PATH = OUTPUTS_DIR / "summary.json"
+CUR_SUMMARY_PATH = OUTPUTS_DIR / "cur_summary.json"
 
 DEFAULT_NEO4J_IMAGE = "neo4j:latest"
 CONTAINER_PREFIX = "vastdb-eval"
@@ -895,7 +897,10 @@ def parse_json_lenient(text: str) -> Any:
         return json.loads(stripped[start : end + 1])
 
 
-def build_score_statistics(results: list[dict[str, Any]]) -> dict[str, Any]:
+def build_score_statistics(
+    results: list[dict[str, Any]],
+    metrics_by_case: dict[str, dict[str, Any]],
+) -> dict[str, Any]:
     summary: dict[str, Any] = {
         "evaluated": 0,
         "skipped": 0,
@@ -922,17 +927,27 @@ def build_score_statistics(results: list[dict[str, Any]]) -> dict[str, Any]:
             summary["skipped"] += 1
             summary["errors"].append({"case": case_name, "error": "missing case name"})
             continue
-        try:
-            judge = read_judge_output(case_name)
-            baseline = judge["baseline"]
-            vastdb = judge["vastdb"]
-            baseline_score = float(baseline["score"])
-            vastdb_score = float(vastdb["score"])
-        except (EvalError, KeyError, TypeError, ValueError) as exc:
+
+        metrics = metrics_by_case.get(case_name)
+        if not metrics:
             summary["skipped"] += 1
-            summary["errors"].append({"case": case_name, "error": str(exc)})
+            summary["errors"].append({"case": case_name, "error": "missing in-memory metrics"})
+            continue
+        score = metrics.get("score")
+        if not isinstance(score, dict):
+            summary["skipped"] += 1
+            summary["errors"].append(
+                {
+                    "case": case_name,
+                    "error": str(metrics.get("score_error") or "missing judge metrics"),
+                }
+            )
             continue
 
+        baseline = score["baseline"]
+        vastdb = score["vastdb"]
+        baseline_score = float(baseline["score"])
+        vastdb_score = float(vastdb["score"])
         summary["evaluated"] += 1
         baseline_score_total += baseline_score
         vastdb_score_total += vastdb_score
@@ -972,7 +987,59 @@ def case_work_dir(case_name: str) -> Path:
     return OUTPUTS_DIR / f"CWD-{match.group(1)}" / case_name
 
 
-def build_average_duration_statistics(results: list[dict[str, Any]]) -> dict[str, Any]:
+def build_case_metrics(result: dict[str, Any]) -> dict[str, Any]:
+    case_name = result.get("case")
+    metrics: dict[str, Any] = {
+        "case": case_name,
+        "score": None,
+        "score_error": None,
+        "durations": {},
+    }
+    if not isinstance(case_name, str):
+        metrics["score_error"] = "missing case name"
+        return metrics
+
+    durations: dict[str, float] = {}
+    for stage in ("baseline", "vastdb", "judge"):
+        try:
+            durations[stage] = read_stage_duration_seconds(case_name, stage)
+        except EvalError:
+            continue
+    metrics["durations"] = durations
+
+    if result.get("ok") is not True:
+        return metrics
+
+    try:
+        judge = read_judge_output(case_name)
+        metrics["score"] = {
+            "baseline": {
+                "correct": judge["baseline"]["correct"],
+                "score": float(judge["baseline"]["score"]),
+            },
+            "vastdb": {
+                "correct": judge["vastdb"]["correct"],
+                "score": float(judge["vastdb"]["score"]),
+            },
+        }
+    except (EvalError, KeyError, TypeError, ValueError) as exc:
+        metrics["score_error"] = str(exc)
+    return metrics
+
+
+def build_metrics_cache(results: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
+    cache: dict[str, dict[str, Any]] = {}
+    for result in results:
+        case_name = result.get("case")
+        if isinstance(case_name, str):
+            cache[case_name] = build_case_metrics(result)
+    return cache
+
+
+def build_average_duration_statistics(
+    results: list[dict[str, Any]],
+    metrics_by_case: dict[str, dict[str, Any]],
+) -> dict[str, Any]:
     summary: dict[str, Any] = {}
     for stage in ("baseline", "vastdb", "judge"):
         durations: list[float] = []
@@ -980,10 +1047,15 @@ def build_average_duration_statistics(results: list[dict[str, Any]]) -> dict[str
             case_name = result.get("case")
             if not isinstance(case_name, str):
                 continue
-            try:
-                durations.append(read_stage_duration_seconds(case_name, stage))
-            except EvalError as exc:
+            metrics = metrics_by_case.get(case_name)
+            if not metrics:
                 continue
+            stage_durations = metrics.get("durations")
+            if not isinstance(stage_durations, dict):
+                continue
+            duration = stage_durations.get(stage)
+            if isinstance(duration, (int, float)):
+                durations.append(float(duration))
         if durations:
             average = sum(durations) / len(durations)
             summary[stage] = format_duration_seconds(average)
@@ -1019,11 +1091,105 @@ def parse_duration_seconds(value: str) -> int | None:
     return int(match.group(1)) * 60 + int(match.group(2))
 
 
-def build_statistics(results: list[dict[str, Any]]) -> dict[str, Any]:
+def build_statistics(
+    results: list[dict[str, Any]],
+    metrics_by_case: dict[str, dict[str, Any]],
+) -> dict[str, Any]:
     return {
-        "score": build_score_statistics(results),
-        "avg_duration": build_average_duration_statistics(results),
+        "score": build_score_statistics(results, metrics_by_case),
+        "avg_duration": build_average_duration_statistics(results, metrics_by_case),
     }
+
+
+def case_name_sort_key(name: Any) -> tuple[int, int, str]:
+    if isinstance(name, str):
+        match = re.fullmatch(r"CWD-(\d+)-(\d+)", name)
+        if match:
+            return (int(match.group(1)), int(match.group(2)), name)
+        return (sys.maxsize, sys.maxsize, name)
+    return (sys.maxsize, sys.maxsize, str(name))
+
+
+def sorted_results(results: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    return sorted(results, key=lambda item: case_name_sort_key(item.get("case")))
+
+
+def results_by_case(results: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
+    indexed: dict[str, dict[str, Any]] = {}
+    for result in results:
+        case_name = result.get("case")
+        if isinstance(case_name, str):
+            indexed[case_name] = result
+    return indexed
+
+
+def load_summary_results(path: Path) -> dict[str, dict[str, Any]]:
+    if not path.exists():
+        return {}
+    try:
+        summary = read_json(path)
+    except EvalError:
+        return {}
+    results = summary.get("results")
+    if not isinstance(results, list):
+        return {}
+    return results_by_case([item for item in results if isinstance(item, dict)])
+
+
+def build_summary_document(
+    run_time: str,
+    jobs: int,
+    total: int,
+    pending: int,
+    results: list[dict[str, Any]],
+    metrics_by_case: dict[str, dict[str, Any]],
+) -> dict[str, Any]:
+    ordered_results = sorted_results(results)
+    return {
+        "time": run_time,
+        "jobs": jobs,
+        "total": total,
+        "pending": pending,
+        "ok": sum(1 for item in ordered_results if item.get("ok") is True),
+        "failed": sum(1 for item in ordered_results if item.get("ok") is not True),
+        "statistics": build_statistics(ordered_results, metrics_by_case),
+        "results": ordered_results,
+    }
+
+
+def write_summaries(
+    run_time: str,
+    jobs: int,
+    summary_total: int,
+    current_total: int,
+    pending: int,
+    cumulative_results: dict[str, dict[str, Any]],
+    current_results: dict[str, dict[str, Any]],
+    cumulative_metrics: dict[str, dict[str, Any]],
+    current_metrics: dict[str, dict[str, Any]],
+) -> None:
+    write_json(
+        SUMMARY_PATH,
+        build_summary_document(
+            run_time,
+            jobs,
+            summary_total,
+            pending,
+            list(cumulative_results.values()),
+            cumulative_metrics,
+        ),
+    )
+    write_json(
+        CUR_SUMMARY_PATH,
+        build_summary_document(
+            run_time,
+            jobs,
+            current_total,
+            pending,
+            list(current_results.values()),
+            current_metrics,
+        ),
+    )
 
 
 def append_run_record(case: TestCase, kind: str, data: dict[str, Any]) -> None:
@@ -1181,40 +1347,67 @@ def main() -> int:
 
     reset_progress_log()
     print(f"Selected {len(cases)} test case(s), jobs={args.jobs}")
-    results: list[dict[str, Any]] = []
+    run_time = now_east8_iso()
+    cumulative_results = load_summary_results(SUMMARY_PATH)
+    cumulative_metrics = build_metrics_cache(list(cumulative_results.values()))
+    current_results: dict[str, dict[str, Any]] = {}
+    current_metrics: dict[str, dict[str, Any]] = {}
+    pending_cases = {case.name for case in cases}
+    summary_total = len(set(cumulative_results) | pending_cases)
+    current_total = len(cases)
+
+    def record_result(result: dict[str, Any]) -> None:
+        case_name = result.get("case")
+        if isinstance(case_name, str):
+            cumulative_results[case_name] = result
+            current_results[case_name] = result
+            metrics = build_case_metrics(result)
+            cumulative_metrics[case_name] = metrics
+            current_metrics[case_name] = metrics
+            pending_cases.discard(case_name)
+        write_summaries(
+            run_time,
+            args.jobs,
+            summary_total,
+            current_total,
+            len(pending_cases),
+            cumulative_results,
+            current_results,
+            cumulative_metrics,
+            current_metrics,
+        )
+
+    write_summaries(
+        run_time,
+        args.jobs,
+        summary_total,
+        current_total,
+        len(pending_cases),
+        cumulative_results,
+        current_results,
+        cumulative_metrics,
+        current_metrics,
+    )
 
     try:
         if args.jobs == 1:
             for case in cases:
                 print(f"Running {case.name}")
                 result = run_case(case, cfg)
-                results.append(result)
+                record_result(result)
                 print_result(result)
         else:
             with concurrent.futures.ThreadPoolExecutor(max_workers=args.jobs) as executor:
                 future_to_case = {executor.submit(run_case, case, cfg): case for case in cases}
                 for future in concurrent.futures.as_completed(future_to_case):
                     result = future.result()
-                    results.append(result)
+                    record_result(result)
                     print_result(result)
     except KeyboardInterrupt:
         print("Interrupted. Cleanup completed for the active test case where possible.", file=sys.stderr)
         return 130
 
-    summary_path = OUTPUTS_DIR / "summary.json"
-    write_json(
-        summary_path,
-        {
-            "time": now_east8_iso(),
-            "jobs": args.jobs,
-            "total": len(results),
-            "ok": sum(1 for item in results if item["ok"]),
-            "failed": sum(1 for item in results if not item["ok"]),
-            "statistics": build_statistics(results),
-            "results": results,
-        },
-    )
-    return 0 if all(item["ok"] for item in results) else 1
+    return 0 if all(item.get("ok") is True for item in current_results.values()) else 1
 
 
 def print_result(result: dict[str, Any]) -> None:

@@ -410,20 +410,45 @@ outputs/progress.log
 
 如果复用已有容器，脚本会跳过写库，也就不会写 `write database` 进度。
 
-### summary.json
+### summary.json / cur_summary.json
 
-批量运行结束后写入：
+脚本会维护两个汇总文件：
 
 ```text
 outputs/summary.json
+outputs/cur_summary.json
 ```
 
-内容包括东八区时间、jobs、总数、成功数、失败数、每个测试用例状态，以及 `statistics` 汇总：
+`summary.json` 是累计汇总。每次 `run_eval.py` 执行时会加载旧文件，按 testcase 名称更新 `results` 中已有记录；如果 testcase 不存在，则创建新记录。
 
-- baseline/vastdb 各自的 `correct` 个数。
-- baseline/vastdb 各自的 `avg_score`。
-- `vastdb_better`：vastdb 分数高于 baseline 的测试用例数量。
+`cur_summary.json` 只记录本次 `run_eval.py` 选择的 testcase 结果。
+
+两个文件都会在运行开始时初始化，并在每个 testcase 执行完成后实时重写一次。
+
+顶层字段：
+
+- `time`：本次 `run_eval.py` 的启动时间。
+- `jobs`：本次 `run_eval.py` 的并行度。
+- `total`：运行开始时确定，运行过程中不变化。`summary.json` 中是累计 testcase 数，`cur_summary.json` 中是本次选择的 testcase 数。
+- `ok`：当前 `results` 中 `ok=true` 的 testcase 数。
+- `failed`：当前 `results` 中 `ok=false` 的 testcase 数。运行过程中，尚未完成的 testcase 不计入 `failed`。
+- `pending`：本次运行尚未完成的 testcase 数。
+- `statistics`：根据当前 `results` 实时计算的统计信息。
+- `results`：测试用例结果列表。
+
+因此运行过程中：
+
+- `cur_summary.json` 满足 `ok + failed + pending = total`。
+- `summary.json` 的 `pending` 只表示本次运行中未完成的 testcase；累计历史结果已经在 `results` 中，不属于 pending。
+
+`statistics` 字段包括：
+
+- `score.baseline.correct` / `score.vastdb.correct`：baseline/vastdb 各自正确的 testcase 数。
+- `score.baseline.avg_score` / `score.vastdb.avg_score`：baseline/vastdb 各自平均分。
+- `score.vastdb_better`：vastdb 分数高于 baseline 的 testcase 数。
 - `avg_duration`：baseline/vastdb/judge 三个 agent 阶段的平均耗时。
+
+两个文件中的 `results` 都按 `CWD-ID` 和 testcase 的第二段 ID 排序。
 
 judge 汇总只统计成功完成且能读取合法 `results/judge/output.json` 的测试用例；失败或缺失 judge 输出的用例计入 `skipped`。
 

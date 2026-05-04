@@ -72,4 +72,5 @@
    ```text
    outputs/progress.log
    outputs/summary.json
+   outputs/cur_summary.json
    ```
