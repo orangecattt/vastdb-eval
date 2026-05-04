@@ -3,6 +3,11 @@
   "share": "disabled",
   "snapshot": false,
   "model": "alibaba-cn/deepseek-v3",
+  "compaction": {
+    "auto": true,
+    "prune": true,
+    "reserved": 10000
+  },
   "permission": {
     "read": "allow",
     "edit": "allow",

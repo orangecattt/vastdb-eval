@@ -940,7 +940,7 @@ def build_score_statistics(results: list[dict[str, Any]]) -> dict[str, Any]:
             summary["baseline"]["correct"] += 1
         if vastdb.get("correct") is True:
             summary["vastdb"]["correct"] += 1
-        if vastdb_score > baseline_score:
+        if vastdb_score >= baseline_score:
             summary["vastdb_better"] += 1
 
     evaluated = summary["evaluated"]
