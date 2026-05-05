@@ -981,22 +981,12 @@ def validate_judge_output(result_dir: Path) -> None:
     output_path = result_dir / "output.json"
     raw = output_path.read_text(encoding="utf-8")
     try:
-        data = parse_json_lenient(raw)
+        data = normalize_judge_output(parse_json_lenient(raw), "judge")
     except json.JSONDecodeError as exc:
         raise EvalError("judge", f"judge output is not valid JSON: {exc}") from exc
     if raw != json.dumps(data, indent=2, ensure_ascii=False) + "\n":
         output_path.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
-    for key in ("baseline", "vastdb"):
-        entry = data.get(key)
-        if not isinstance(entry, dict):
-            raise EvalError("judge", f"judge output missing object: {key}")
-        if not isinstance(entry.get("correct"), bool):
-            raise EvalError("judge", f"judge output {key}.correct must be boolean")
-        score = entry.get("score")
-        if not isinstance(score, (int, float)) or score < 0 or score > 10:
-            raise EvalError("judge", f"judge output {key}.score must be 0-10")
-        if not isinstance(entry.get("reason"), str):
-            raise EvalError("judge", f"judge output {key}.reason must be string")
+    validate_judge_data(data, "judge", require_reason=True, require_score_range=True)
 
 
 def parse_json_lenient(text: str) -> Any:
@@ -1012,6 +1002,43 @@ def parse_json_lenient(text: str) -> Any:
         if start == -1 or end == -1 or end <= start:
             raise
         return json.loads(stripped[start : end + 1])
+
+
+def normalize_judge_output(data: Any, stage: str) -> dict[str, Any]:
+    if isinstance(data, dict) and ("baseline" not in data or "vastdb" not in data) and "json" in data:
+        nested = data.get("json")
+        if isinstance(nested, str):
+            try:
+                data = parse_json_lenient(nested)
+            except json.JSONDecodeError as exc:
+                raise EvalError(stage, f"judge output json field is not valid JSON: {exc}") from exc
+        elif isinstance(nested, dict):
+            data = nested
+    if not isinstance(data, dict):
+        raise EvalError(stage, "judge output must be a JSON object")
+    return data
+
+
+def validate_judge_data(
+    data: dict[str, Any],
+    stage: str,
+    *,
+    require_reason: bool = False,
+    require_score_range: bool = False,
+) -> None:
+    for key in ("baseline", "vastdb"):
+        entry = data.get(key)
+        if not isinstance(entry, dict):
+            raise EvalError(stage, f"judge output missing object: {key}")
+        if not isinstance(entry.get("correct"), bool):
+            raise EvalError(stage, f"judge output {key}.correct must be boolean")
+        score = entry.get("score")
+        if not isinstance(score, (int, float)):
+            raise EvalError(stage, f"judge output {key}.score must be number")
+        if require_score_range and (score < 0 or score > 10):
+            raise EvalError(stage, f"judge output {key}.score must be 0-10")
+        if require_reason and not isinstance(entry.get("reason"), str):
+            raise EvalError(stage, f"judge output {key}.reason must be string")
 
 
 def build_score_statistics(
@@ -1075,16 +1102,8 @@ def build_score_statistics(
 
 def read_judge_output(case_name: str) -> dict[str, Any]:
     output_path = case_work_dir(case_name) / "results" / "judge" / "output.json"
-    data = read_json(output_path)
-    for key in ("baseline", "vastdb"):
-        entry = data.get(key)
-        if not isinstance(entry, dict):
-            raise EvalError("summary", f"judge output missing object: {key}")
-        if not isinstance(entry.get("correct"), bool):
-            raise EvalError("summary", f"judge output {key}.correct must be boolean")
-        score = entry.get("score")
-        if not isinstance(score, (int, float)):
-            raise EvalError("summary", f"judge output {key}.score must be number")
+    data = normalize_judge_output(read_json(output_path), "summary")
+    validate_judge_data(data, "summary")
     return data
 
 
