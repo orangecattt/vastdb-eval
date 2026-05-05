@@ -8,12 +8,15 @@ Known vulnerable location:
 
 Analyze the vulnerable code in this directory. Avoid guessing beyond what the code supports. Treat the known vulnerable location text as anchors, not as a guaranteed chronological source-to-sink ordering; inspect the code to determine the actual trigger order.
 
-Use this workflow:
+# Workflow
 
-1. First inspect the local code with text search/read tools to identify the relevant functions, line numbers, and plausible trigger path.
-2. Then, use the available skill to understand the VAST DB schema, generate database queries, and execute a cypher query to retrieve call-chain or data-flow information. **At least execute a cypher query**.
-3. If query fail, return the best code-backed analysis anyway. Do not refuse, do not leave placeholder frames, and do not say the path cannot be proven solely because database-backed evidence was unavailable.
-4. Use VAST DB evidence as supporting evidence, not as a prerequisite for answering.
+1. Use text search/read tools only enough to locate the known vulnerable anchors in source code.
+2. Before writing VAST DB Cypher queries, load the `write-cypher` skill. Load the `understand-mlir-schema` skill when you need schema details to construct queries or interpret returned records.
+3. Treat VAST DB as a code navigation tool. Starting from the current anchors, use VAST DB to find relevant symbol, caller, callee, def, or use locations.
+4. Alternate between VAST DB and source reading: query VAST DB for the next interesting locations, inspect those source locations with text search/read tools, then use what you learned as anchors for the next VAST DB query.
+5. Execute at least one `run_cypher` query. If a VAST DB query fails or returns no complete call-chain/data-flow path, try narrower VAST DB navigation queries before relying only on text search/read tools.
+
+# Output Schema
 
 Return only the final explanation in this exact structure:
 
