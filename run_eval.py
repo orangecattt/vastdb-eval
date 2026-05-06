@@ -1236,7 +1236,7 @@ def parse_json_lenient(text: str) -> Any:
 
 
 def normalize_judge_output(data: Any, stage: str) -> dict[str, Any]:
-    if isinstance(data, dict) and ("baseline" not in data or "vastdb" not in data) and "json" in data:
+    if isinstance(data, dict) and ("baseline" not in data or "vastdb" not in data):
         nested = data.get("json")
         if isinstance(nested, str):
             try:
@@ -1247,7 +1247,60 @@ def normalize_judge_output(data: Any, stage: str) -> dict[str, Any]:
             data = nested
     if not isinstance(data, dict):
         raise EvalError(stage, "judge output must be a JSON object")
+    nested = nested_judge_output_from_stage_fields(data, stage)
+    if nested is not None:
+        return nested
     return data
+
+
+def nested_judge_output_from_stage_fields(data: dict[str, Any], stage: str) -> dict[str, Any] | None:
+    converted = dict(data)
+    for key in ("baseline", "vastdb"):
+        nested = converted.get(key)
+        if not isinstance(nested, str):
+            continue
+        try:
+            parsed = parse_json_lenient(nested)
+        except json.JSONDecodeError as exc:
+            parsed = parse_stage_string_with_sibling(key, nested)
+            if parsed is None:
+                raise EvalError(stage, f"judge output {key} field is not valid JSON: {exc}") from exc
+        if isinstance(parsed, dict) and isinstance(parsed.get("baseline"), dict) and isinstance(parsed.get("vastdb"), dict):
+            return parsed
+        if isinstance(parsed, dict) and is_judge_stage_entry(parsed):
+            converted[key] = parsed
+    if isinstance(converted.get("baseline"), dict) and isinstance(converted.get("vastdb"), dict):
+        return converted
+    return None
+
+
+def is_judge_stage_entry(data: dict[str, Any]) -> bool:
+    return isinstance(data.get("correct"), bool) and isinstance(data.get("score"), (int, float))
+
+
+def parse_stage_string_with_sibling(key: str, text: str) -> dict[str, Any] | None:
+    stripped = text.strip()
+    try:
+        first, offset = json.JSONDecoder().raw_decode(stripped)
+    except json.JSONDecodeError:
+        return None
+    if not isinstance(first, dict):
+        return None
+
+    remainder = stripped[offset:].strip()
+    if not remainder.startswith(","):
+        return None
+    try:
+        sibling = parse_json_lenient("{" + remainder[1:].strip())
+    except json.JSONDecodeError:
+        return None
+    if not isinstance(sibling, dict):
+        return None
+
+    combined = {key: first, **sibling}
+    if isinstance(combined.get("baseline"), dict) and isinstance(combined.get("vastdb"), dict):
+        return combined
+    return None
 
 
 def validate_judge_data(
