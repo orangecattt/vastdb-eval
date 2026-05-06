@@ -11,6 +11,6 @@ outputs/*
 cves/*
 **/build
 **/*.o
-outputs-example/[!0-9]*
+outputs-archive/*
 node_modules/*
 __pycache__/*

@@ -27,7 +27,7 @@ def parse_args() -> argparse.Namespace:
             "Copy vastdb-eval outputs to a new directory, then keep only "
             "results/ under every CWD testcase directory. Remaining results "
             "subdirectories keep only log.json, output.txt, and "
-            "results/judge/output.json. "
+            "results/judge/output.json by default. "
             "Top-level output files keep only summary.json."
         )
     )
@@ -47,6 +47,11 @@ def parse_args() -> argparse.Namespace:
         "--dry-run",
         action="store_true",
         help="show what would be removed without copying or deleting anything",
+    )
+    parser.add_argument(
+        "--full",
+        action="store_true",
+        help="export a fuller copy with more diagnostic artifacts, including results/judge/log.json",
     )
     return parser.parse_args()
 
@@ -105,7 +110,7 @@ def top_level_file_removals(root: Path) -> list[Path]:
     )
 
 
-def plan_removals(root: Path) -> tuple[list[Path], int]:
+def plan_removals(root: Path, keep_judge_log: bool = False) -> tuple[list[Path], int]:
     cases = testcase_dirs(root)
     removals: list[Path] = top_level_file_removals(root)
     for case in cases:
@@ -125,7 +130,7 @@ def plan_removals(root: Path) -> tuple[list[Path], int]:
                     continue
                 if path.is_file() or path.is_symlink():
                     relative_path = path.relative_to(results_dir)
-                    if relative_path == Path("judge/log.json"):
+                    if relative_path == Path("judge/log.json") and not keep_judge_log:
                         removals.append(path)
                         continue
                     if (
@@ -188,8 +193,6 @@ def redact_exported_logs(root: Path) -> tuple[int, int]:
     log_count = 0
     redacted_count = 0
     for path in sorted(root.glob("CWD-*/CWD-*/results/**/log.json")):
-        if path.relative_to(root).parts[-2] == "judge":
-            continue
         log_count += 1
         redacted_count += redact_exported_log(path)
     return log_count, redacted_count
@@ -209,7 +212,7 @@ def main() -> int:
 
     root_for_plan = source if args.dry_run else dest
     if args.dry_run:
-        removals, case_count = plan_removals(source)
+        removals, case_count = plan_removals(source, args.full)
         print(f"Would copy: {source} -> {dest}")
         print(f"Found {case_count} testcase directories.")
         print(f"Would remove {len(removals)} paths from the copy.")
@@ -218,7 +221,7 @@ def main() -> int:
         return 0
 
     copy_outputs(source, dest)
-    removals, case_count = plan_removals(root_for_plan)
+    removals, case_count = plan_removals(root_for_plan, args.full)
     removed = 0
     for path in removals:
         removed += int(remove_path(path))
