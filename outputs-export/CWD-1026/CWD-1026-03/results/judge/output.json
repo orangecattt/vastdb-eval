@@ -1,0 +1,12 @@
+{
+  "baseline": {
+    "correct": false,
+    "score": 3,
+    "reason": "Identifies UAF and the right function, but gets the trigger mechanism completely wrong: claims the local variable `node` is stale after realloc, when in fact `node` is reassigned each iteration. The actual dangling pointer is `node->v` (a field within SaveNode) pointing to the embedded `&node->sorted` that was invalidated by realloc."
+  },
+  "vastdb": {
+    "correct": true,
+    "score": 7,
+    "reason": "Correctly identifies that SaveNode contents (including `node->v`) are copied by value via realloc and `node->v` still points to old freed memory. Captures the core data-flow mechanism. However, doesn't explicitly call out the self-referential `node->v = &node->sorted` assignment as the root cause, and includes a slightly confused statement about local `node` variable and stackSize."
+  }
+}

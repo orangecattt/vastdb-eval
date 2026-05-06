@@ -1,0 +1,12 @@
+{
+  "baseline": {
+    "correct": true,
+    "score": 9,
+    "reason": "Accurately identifies root cause (incorrect check at line 250 allows *outlen > inlen), vulnerable location (memcpy line 255), and trigger path (caller allocates out with inlen bytes). Minor imprecision about tmp vs out buffer sizing, but substantively correct."
+  },
+  "vastdb": {
+    "correct": true,
+    "score": 9,
+    "reason": "Accurately identifies root cause (missing bounds check on tmp[0] vs output buffer), vulnerable memcpy at line 255, and full call chain from ossl_cms_RecipientInfo_pwri_crypt. Clear and correct with no speculation."
+  }
+}

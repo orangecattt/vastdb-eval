@@ -1,0 +1,20 @@
+## Root Cause
+
+The vulnerability occurs because `all_relocations_root[j].r_symbol` at line 1673 in `process_got_section_contents` is freed with an uninitialized/invalid pointer. The root cause is a mismatch between allocation and initialization: `update_all_relocations` at line 1438 allocates memory for `all_relocations_root` entries via `xmalloc`/`xrealloc`, but the `r_symbol` fields remain uninitialized (contain garbage). When `slurp_rela_relocs` fails at line 690 in `dump_relocations`, the function returns early, and the initialization loop at lines 1286-1293 that sets `r_symbol` is never reached. However, `all_relocations_count` is already incremented by `update_all_relocations`, so the cleanup loop in `process_got_section_contents` still iterates over these uninitialized entries and attempts to free `r_symbol`, causing CWE-763.
+
+## Trigger Path
+
+1. `bad.c:1682` `process_object`
+   - Top-level function that processes an ELF file; calls `process_relocs` then `process_got_section_contents` sequentially.
+
+2. `bad.c:1339` `process_relocs`
+   - Iterates through dynamic relocation entries; calls `update_all_relocations` at line 1438 to allocate relocation storage, then calls `dump_relocations` at line 1440.
+
+3. `bad.c:670` `dump_relocations`
+   - Calls `slurp_rela_relocs` at line 690. If this fails and returns false, the function returns early at line 691 without populating the `r_symbol` fields in `all_relocations_root`.
+
+4. `bad.c:1767` `process_object` (continued)
+   - After `process_relocs` returns, control flows to `process_got_section_contents`.
+
+5. `bad.c:1510` `process_got_section_contents`
+   - At line 1673, iterates through all entries in `all_relocations_root` and calls `free(all_relocations_root[j].r_symbol)`. Since `r_symbol` was never initialized when `slurp_rela_relocs` failed, this frees an invalid pointer, triggering CWE-763.

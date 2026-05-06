@@ -1,0 +1,22 @@
+Now I have enough information to understand the vulnerability:
+
+## Root Cause
+
+The vulnerability is a NULL Pointer Dereference (CWE-476). In `ambisonics_config()` (line 1770), when `ambisonics_mode > 1`, the function returns early at line 1781 without allocating `audio_element->layers` (which only happens at line 1792). Later, in `iamf_read_header()` at line 1891, the code accesses `audio_element->layers[0].substream_count` without checking if `layers` was allocated, causing a NULL pointer dereference when `ambisonics_mode > 1` was set in the input.
+
+## Trigger Path
+
+1. `bad.c:1854` `iamf_read_header`
+   - Entry point that reads IAMF format headers; calls `ff_iamfdec_read_descriptors` to parse OBUs, then iterates over audio elements at line 1864
+
+2. `bad.c:1708` `ff_iamfdec_read_descriptors`
+   - Parses OBU headers from input stream; dispatches to `audio_element_obu` at line 1744 when type is `IAMF_OBU_IA_AUDIO_ELEMENT`
+
+3. `bad.c:1277` `audio_element_obu`
+   - Handles audio element OBU parsing; calls `ambisonics_config` at line 1424 when `audio_element_type == AV_IAMF_AUDIO_ELEMENT_TYPE_SCENE`
+
+4. `bad.c:1770` `ambisonics_config`
+   - Parses ambisonics configuration; reads `ambisonics_mode` from input at line 1779, returns early at line 1781 without allocating `audio_element->layers` when `ambisonics_mode > 1`
+
+5. `bad.c:1891` (in `iamf_read_header`)
+   - After `ff_iamfdec_read_descriptors` returns, the code accesses `audio_element->layers[0].substream_count` without NULL check, triggering the dereference of unallocated NULL pointer

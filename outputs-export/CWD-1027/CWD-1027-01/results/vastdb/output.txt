@@ -1,0 +1,20 @@
+Now I have enough information from both code analysis and VAST DB to provide the final explanation.
+
+## Root Cause
+
+The vulnerability is a missing memory release (CWE-401) in the `AudioCrossoverContext` filter. At line 418 in `bad.c`, `s->xover` is allocated via `av_calloc()` to store per-channel crossover filter data. However, in the `uninit` function (lines 513-522), only `s->splits` is freed at line 518 using `av_freep()`. The `s->xover` pointer is never freed, causing a memory leak when the filter is destroyed.
+
+## Trigger Path
+
+1. `bad.c:459` `init(AVFilterContext *ctx)`
+   - Initializes the filter, allocates `s->splits` at line 465
+
+2. `bad.c:411` `config_input(AVFilterLink *inlink)`
+   - Called when the filter is configured with input parameters
+   - Allocates `s->xover = av_calloc(inlink->channels, sizeof(*s->xover))` at line 418
+   - This is the vulnerable allocation
+
+3. `bad.c:513` `uninit(AVFilterContext *ctx)`
+   - Called when the filter is destroyed/cleaned up
+   - Only frees `s->splits` at line 518 via `av_freep(&s->splits)`
+   - **Missing**: Does NOT free `s->xover` - this is the bug

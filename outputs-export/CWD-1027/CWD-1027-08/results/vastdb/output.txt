@@ -1,0 +1,13 @@
+Now I have enough information. Let me provide the final analysis:
+
+## Root Cause
+
+The vulnerability is in `ff_frame_thread_encoder_init` (bad.c:1426). At line 1506, a new `AVCodecContext *thread_avctx` is allocated via `avcodec_alloc_context3(avctx->codec)`. When subsequent operations fail (at lines 1511-1513, 1517-1519, 1524-1525, or 1528-1529), the code jumps to the `fail:` label at line 1536. The cleanup at `fail:` only calls `ff_frame_thread_encoder_free(avctx)` which frees the parent ThreadContext but does NOT free the `thread_avctx` allocated at line 1506. This causes a memory leak - the allocated context is never freed before `return -1` at line 1540.
+
+## Trigger Path
+
+1. `bad.c:1426` `ff_frame_thread_encoder_init` - Entry point function that initializes frame thread encoding
+2. `bad.c:1506` `avcodec_alloc_context3(avctx->codec)` - Allocates new AVCodecContext for thread-specific context (the source/memory allocation)
+3. After allocation, if any of these fail (av_opt_copy at 1511, avcodec_open2 at 1524, pthread_create at 1528), the code performs `goto fail`
+4. `bad.c:1536` `fail:` label - Error handling path; calls `ff_frame_thread_encoder_free(avctx)` which does NOT free thread_avctx
+5. `bad.c:1540` `return -1` - Returns error code (the sink) without freeing the allocated `thread_avctx`, causing memory leak

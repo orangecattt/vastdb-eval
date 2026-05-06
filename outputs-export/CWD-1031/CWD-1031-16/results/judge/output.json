@@ -1,0 +1,12 @@
+{
+  "baseline": {
+    "correct": false,
+    "score": 2,
+    "reason": "Describes the wrong trigger path: claims the issue is gf_xml_locate_entity returning NULL with needs_text=TRUE (entity name too short), leading to NULL-ent dereference. But the actual root cause is ent being non-NULL while ent->value is NULL (incomplete entity parsed by xml_sax_parse_entity). The fix is in xml_sax_parse_entity (syntax error on missing value) and a NULL guard in xml_sax_append_string, not in the !ent logic the baseline focuses on."
+  },
+  "vastdb": {
+    "correct": true,
+    "score": 7,
+    "reason": "Correctly identifies the root cause: entity allocated via GF_SAFEALLOC is added to the list before its value field is initialized, leaving it NULL. Correctly traces the data flow from allocation to ent->value dereference through xml_sax_append_string to strlen. Minor imprecision: cites error paths at lines 193-196/202-203 which return before the entity is added, rather than the actual path (while-loop exit without hitting the separator). Overall mechanism and trigger path are accurate."
+  }
+}

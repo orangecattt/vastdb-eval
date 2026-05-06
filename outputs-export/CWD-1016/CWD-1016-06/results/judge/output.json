@@ -1,0 +1,12 @@
+{
+  "baseline": {
+    "correct": false,
+    "score": 2,
+    "reason": "Focuses on planeheight[3] being set for <4-plane formats as root cause. The actual fix is a height<3 check; the 'number of planes' theory is unsupported speculation and does not match the patch."
+  },
+  "vastdb": {
+    "correct": false,
+    "score": 2,
+    "reason": "Same fundamental error as baseline — incorrectly blames planeheight[3]/nb_planes initialization. Adds speculation about 'format with 4 planes'. Neither identifies the actual small-height (<3) trigger mechanism fixed in the patch."
+  }
+}

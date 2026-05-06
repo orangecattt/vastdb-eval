@@ -1,0 +1,12 @@
+{
+  "baseline": {
+    "correct": true,
+    "score": 9,
+    "reason": "Accurately identifies CWE-476 NULL pointer dereference, the early return at line 1781 without allocating layers, and the dereference at line 1891. Trigger path is fully traced. Minor deduction: does not highlight the semantic key — returning 0 (success) vs AVERROR_INVALIDDATA (error) — which is the actual fix."
+  },
+  "vastdb": {
+    "correct": true,
+    "score": 9,
+    "reason": "Equally accurate root cause identification, same trigger path, same line numbers. Minor deduction: evidence section claims ambisonics_config is at line 864 which is inconsistent with the actual code (line 1770), though this does not affect the core explanation."
+  }
+}

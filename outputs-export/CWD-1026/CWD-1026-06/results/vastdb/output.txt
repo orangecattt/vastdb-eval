@@ -1,0 +1,25 @@
+Based on my analysis of the code, here's the vulnerability explanation:
+
+## Root Cause
+
+The vulnerability is a Use-After-Free in the GPAC dasher filter's `dasher_configure_pid` function. The issue occurs when setting the `GF_PROP_PID_FILE_EXT` property: if the new value equals the existing property value, `gf_filter_pid_set_property_full` (line 1161) frees the internal string storage when the property type is `GF_PROP_STRING_NO_COPY`. However, the local variable `segext` in `dasher_configure_pid` still holds a pointer to this freed memory. When `segext` is subsequently used in `strcmp` calls at lines 399 and 411 (the sink), it accesses freed memory, triggering CWE-416.
+
+## Trigger Path
+
+1. `bad.c:250` `dasher_configure_pid`
+   - Entry point for filter PID configuration, called when a PID is configured or reconfigured
+
+2. `bad.c:365-368` or `bad.c:372-384`
+   - If `gf_filter_pid_caps_query` returns a property (line 365), the string pointer is obtained from `p->value.string` (line 368). Otherwise, `segext` is derived from `gf_file_ext_start(ctx->out_path)` or `gf_file_ext_start(ctx->mname)` (lines 372-374), which returns pointers into the original path strings
+
+3. `bad.c:384` `gf_filter_pid_set_property(opid, GF_PROP_PID_FILE_EXT, PROP_STRING(segext))`
+   - Calls into `gf_filter_pid_set_property_full` to set the property
+
+4. `bad.c:1142` `gf_filter_pid_set_property_full`
+   - At line 1159, checks if `gf_props_equal_strict(oldp, value)` returns true (new value equals existing)
+   - At line 1161, if the stored property type is `GF_PROP_STRING_NO_COPY`, it calls `gf_free(value->value.string)` - this frees the memory that `segext` points to
+
+5. `bad.c:399` and `bad.c:411` (sink)
+   - `if (!strcmp(segext, "m3u8"))` - accesses the now-freed `segext` pointer, triggering the use-after-free
+
+Note: The VAST DB in this workspace contains MLIR code analysis, not this C test case. The analysis is based purely on static code inspection.

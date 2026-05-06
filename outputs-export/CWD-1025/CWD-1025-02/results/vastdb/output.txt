@@ -1,0 +1,23 @@
+## Root Cause
+
+The vulnerability is a CWE-415 Double Free in VIM's window/tagstack management. When a popup window is closed with buffer wipe action (`DOBUF_WIPE_REUSE`), the `close_buffer` function calls `mark_forget_file()` which clears the tagstack entries by calling `tagstack_clear_entry()`, which in turn frees `tagname` via `VIM_CLEAR(item->tagname)`. Later, when `win_free_popup()` calls `win_free()` to free the window structure, the tagstack freeing loop at line 622 attempts to `vim_free(wp->w_tagstack[i].tagname)` on the already-freed pointers, causing a double free.
+
+## Trigger Path
+
+1. `bad.c:702` `win_free_popup(win_T *win)`
+   - Entry point: closes a popup window; calls `win_close_buffer` with `DOBUF_WIPE_REUSE` action at line 707
+
+2. `bad.c:707` `win_close_buffer(win, DOBUF_WIPE_REUSE, FALSE)`
+   - Forwards to `close_buffer` with wipe action, which sets `wipe_buf = TRUE` at line 735
+
+3. `bad.c:889` `close_buffer` (wipe_buf branch)
+   - When `wipe_buf` is TRUE, iterates all tab windows and calls `mark_forget_file(wp, buf->b_fnum)` at line 898
+
+4. `bad.c:958` `mark_forget_file(win_T *wp, int fnum)`
+   - For each matching tagstack entry, calls `tagstack_clear_entry(&wp->w_tagstack[i])` which frees `tagname` via `VIM_CLEAR` at line 971
+
+5. `bad.c:716` `win_free(win, NULL)`
+   - After `close_buffer` returns, `win_free_popup` calls `win_free` which has a loop at lines 620-624
+
+6. `bad.c:622` `vim_free(wp->w_tagstack[i].tagname)`
+   - **Sink**: Attempts to free already-freed `tagname` pointers - the double free occurs here

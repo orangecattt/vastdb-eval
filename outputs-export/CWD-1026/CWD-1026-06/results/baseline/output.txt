@@ -1,0 +1,20 @@
+## Root Cause
+
+The vulnerability is a Use-After-Free in `dasher_configure_pid` where `segext` becomes a dangling pointer. At line 368, `segext` is assigned from `p->value.string` where `p` is a property value returned by `gf_filter_pid_caps_query` with type `GF_PROP_STRING_NO_COPY`. When `gf_filter_pid_set_property` is called at line 367 with this property, the internal function `gf_filter_pid_set_property_full` (line 1142) compares the new and existing values at line 1159. If equal and the value type is `GF_PROP_STRING_NO_COPY`, it frees the string buffer at line 1161. However, `segext` still holds a pointer to this now-freed memory. Later at line 399, the `strcmp(segext, "m3u8")` dereferences this dangling pointer, causing the use-after-free.
+
+## Trigger Path
+
+1. `bad.c:250` `dasher_configure_pid`
+   - External entry: called by GPAC filter framework when configuring a filter PID
+   - At line 365: queries caps via `gf_filter_pid_caps_query(pid, GF_PROP_PID_FILE_EXT)` obtaining `p` with `GF_PROP_STRING_NO_COPY` type
+   - At line 367: calls `gf_filter_pid_set_property(opid, GF_PROP_PID_FILE_EXT, p)` passing the no-copy property
+   - At line 368: `segext = p->value.string` - saves pointer to internal buffer
+   - At line 399: `strcmp(segext, "m3u8")` - dereferences dangling pointer (SINK)
+
+2. `bad.c:1136` `gf_filter_pid_set_property`
+   - Public API wrapper that calls the internal function
+
+3. `bad.c:1142` `gf_filter_pid_set_property_full`
+   - At line 1152: retrieves existing property via `gf_filter_pid_get_property`
+   - At line 1159: calls `gf_props_equal_strict(oldp, value)` - if true and type is `GF_PROP_STRING_NO_COPY`, proceeds to free
+   - At line 1161: `gf_free(value->value.string)` - frees the string buffer that `segext` points to (SOURCE)

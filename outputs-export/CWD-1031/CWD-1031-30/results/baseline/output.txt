@@ -1,0 +1,14 @@
+## Root Cause
+
+The vulnerability occurs because `bfd_zalloc` at line 744 can return NULL on memory allocation failure, but the code at line 864 dereferences the `var` pointer to access `var->file` without verifying the allocation succeeded. Although there is a NULL check at lines 745-746, `bfd_alloc` (called internally by `bfd_zalloc` at line 305) can fail silently or return NULL when memory is exhausted, causing `var` to be NULL when `var->file = strdup(spec_var->file)` executes at line 864, leading to a null pointer dereference.
+
+## Trigger Path
+
+1. `bad.c:649` `scan_unit_for_symbols`
+   - Main parsing loop for DWARF debug information entries; iterates through compilation unit DIE attributes.
+
+2. `bad.c:744` `scan_unit_for_symbols`
+   - Allocates `struct varinfo` via `bfd_zalloc(abfd, amt)` and assigns to `var`; if allocation fails and returns NULL, execution continues without proper handling.
+
+3. `bad.c:864` `scan_unit_for_symbols`
+   - The sink: `var->file = strdup(spec_var->file);` dereferences `var` without adequate validation, causing null pointer dereference when `var` is NULL due to failed allocation at line 744.

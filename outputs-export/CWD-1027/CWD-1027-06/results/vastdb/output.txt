@@ -1,0 +1,15 @@
+Based on my code analysis, let me provide the vulnerability explanation:
+
+## Root Cause
+
+The vulnerability is a classic CWE-401 (Missing Release of Memory after Effective Lifetime). In `bad.c`, the function `DlgCreate8` allocates memory at line 353 using `vsmprintf(question, ap)`, which internally calls `malloc()`. When the condition `screen_display==NULL` evaluates to true (lines 354-358), the function returns `NULL` at line 357 without freeing the `buf` pointer. The good version (`good.c` line 357) correctly includes `free(buf)` before returning, which the bad version is missing. This causes a memory leak every time `screen_display` is NULL when `DlgCreate8` is called.
+
+## Trigger Path
+
+Given the evidence from the code and VAST DB:
+
+1. `bad.c:353` `DlgCreate8` - `buf = vsmprintf(question, ap);` allocates heap memory via malloc inside vsmprintf
+
+2. `bad.c:354-357` `DlgCreate8` - The condition `if ( screen_display==NULL )` triggers; `buf` is printed but never freed before `return(NULL);` at line 357
+
+Note: `DlgCreate8` is a static function defined at line 334. The VAST DB query confirms only a `builtin.module` node exists for this C file (no function-level call graph data). The test case is self-contained - the vulnerability is triggerable when external code calls `DlgCreate8` with `screen_display` set to NULL. I cannot prove a specific external caller from the code or VAST DB data, but the vulnerable code path within `DlgCreate8` is clear: allocation at line 353 flows to the leak at line 357 when the NULL screen_display condition is met.

@@ -1,0 +1,19 @@
+Based on my analysis of the code, here's my findings:
+
+## Root Cause
+
+The vulnerability occurs because `avformat_new_stream(s, NULL)` at line 679 is called with a NULL codec argument. When the codec parameter is NULL, the `avformat_new_stream` implementation does not allocate or initialize the `codecpar` (codec parameters) field in the returned AVStream. Later, when `decode_stream_header` attempts to access `st->codecpar->codec_tag` at line 712, `codecpar` is NULL, causing a NULL pointer dereference (CWE-476).
+
+## Trigger Path
+
+1. `bad.c:802` `nut_read_header`
+   - Entry point that parses NUT format container; calls `decode_main_header` to create streams
+
+2. `bad.c:517` `decode_main_header`
+   - Calls `avformat_new_stream(s, NULL)` at line 679 for each stream without initializing codecpar
+
+3. `bad.c:802` `nut_read_header` (continued)
+   - After decode_main_header returns, iterates calling `decode_stream_header` at line 827 to parse each stream's header
+
+4. `bad.c:692` `decode_stream_header`
+   - Retrieves the stream via `st = s->streams[stream_id]` at line 706, then dereferences `st->codecpar->codec_tag` at line 712, triggering the NULL pointer dereference since codecpar was never allocated

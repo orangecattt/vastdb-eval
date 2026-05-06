@@ -1,0 +1,16 @@
+Now I'll analyze the code to find the root cause and trigger path.
+
+## Root Cause
+
+The vulnerability is an **out-of-bounds write** caused by an improper bounds check. The `eval_result` array has size `MAX_REGSUB_NESTING` (4), so valid indices are 0-3. In `vim_regsub_both()` at line 393, the check `if (nesting == MAX_REGSUB_NESTING)` only triggers when `nesting` equals 4, but not when it exceeds 4. When `nesting` is 3, `nested` is set to 3, then `nesting` is incremented to 4 before recursive evaluation (line 445). After the recursive call returns and `nesting` is decremented back to 3, the `nested` value can still exceed the array bounds, causing `eval_result[nested]` at line 418 to access memory beyond the allocated array, leading to an out-of-bounds write via `STRCPY(dest, eval_result[nested])`.
+
+## Trigger Path
+
+1. `bad.c:882` `do_string_sub`
+   - This function performs string substitution using regex; it calls `vim_regsub` at line 951 with the substitution expression
+
+2. `bad.c:850` `vim_regsub`
+   - Wrapper function that sets up regex state (`rex.reg_match`, `rex.reg_buf`, etc.) and calls `vim_regsub_both` at line 872
+
+3. `bad.c:360` `vim_regsub_both`
+   - The vulnerable function where the out-of-bounds write occurs at line 418 via `STRCPY(dest, eval_result[nested])` - the `nested` index exceeds `MAX_REGSUB_NESTING-1` due to the flawed bounds check at line 393

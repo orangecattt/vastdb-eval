@@ -1,0 +1,8 @@
+## Root Cause
+
+The vulnerability is a memory leak in the `param_parse` function. At line 407, `av_iamf_param_definition_alloc()` allocates memory for the `param` object. However, at line 449, when returning `AVERROR_INVALIDDATA` due to an invalid subblock durations check, the allocated `param` is not freed before the return. This causes the memory to leak when the condition `!mode && !constant_subblock_duration && total_duration != duration` is true.
+
+## Trigger Path
+
+1. `bad.c:371` `param_parse`
+   - This is the entry function that parses IAMF parameter definitions. It allocates `param` at line 407 via `av_iamf_param_definition_alloc()` and then processes subblocks in the loop at lines 411-445. The validation at line 447 checks if `!mode && !constant_subblock_duration && total_duration != duration`, and if true, returns `AVERROR_INVALIDDATA` at line 449 without freeing the allocated `param`.

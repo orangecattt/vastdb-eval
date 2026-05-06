@@ -1,0 +1,12 @@
+{
+  "baseline": {
+    "correct": true,
+    "score": 9,
+    "reason": "Accurately identifies double-free root cause: _uhash_put's err handler calls valueDeleter (cacheDeleter→unref) which deletes CacheEntry, then caller's U_FAILURE check triggers delete result. Trigger path is complete, covering both rehash failure and count==length failure paths. Minor: line numbers reference original ICU source offsets rather than exact test file lines."
+  },
+  "vastdb": {
+    "correct": true,
+    "score": 9,
+    "reason": "Correctly identifies the double-free root cause and trigger path, including the specific error at bad.cpp:706 (count==length). Traces through Hashtable::put→uhash_put→_uhash_put→HASH_DELETE_KEY_VALUE→delete result. Slightly less comprehensive than baseline (only mentions one failure mode), but still fully accurate with no unsupported speculation."
+  }
+}

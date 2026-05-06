@@ -1,0 +1,14 @@
+## Root Cause
+
+The vulnerability is a **null pointer dereference (CWE-476)** at line 563 in `bad.c`. The code directly dereferences the return value of `cJSON_GetObjectItem(logJSON, "type")` with `->valuestring` without checking if the pointer is NULL. When the parsed JSON does not contain a "type" key, `cJSON_GetObjectItem()` returns NULL, and dereferencing it (`NULL->valuestring`) causes the program to crash. The good version uses `cJSON_GetStringValue()` which safely handles NULL input.
+
+## Trigger Path
+
+The function `DecodeCiscat` is a decoder function that processes CIS-CAT scan events. The test case code is a library extract without a visible external entry point (no `main()` function). The vulnerable data flow within the function is:
+
+1. `bad.c:526` `DecodeCiscat(Eventinfo *lf, int *socket)` - Entry point; receives Eventinfo with log data in `lf->log`
+2. `bad.c:532` `JSON_Decoder_Exec(lf, NULL)` - Processes the raw log data
+3. `bad.c:555` `cJSON_ParseWithOpts(lf->log, &jsonErrPtr, 0)` - Parses the JSON string from log field
+4. `bad.c:563` `cJSON_GetObjectItem(logJSON, "type")->valuestring` - Vulnerable operation; dereferences without NULL check
+
+**Note**: The external/top-level caller that invokes `DecodeCiscat` is not present in this test case code. The function appears to be called by the Wazuh analysis engine's event processing loop when handling CIS-CAT scan results, but the specific caller function is not defined in this extracted test case.

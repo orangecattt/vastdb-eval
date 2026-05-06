@@ -1,0 +1,12 @@
+{
+  "baseline": {
+    "correct": true,
+    "score": 9,
+    "reason": "Correctly identifies CWE-416 UAF in dasher_configure_pid: segext captures p->value.string (GF_PROP_STRING_NO_COPY) after gf_filter_pid_set_property frees the same memory in set_property_full (line 1161). Accurate on source/sink and trigger path. Minor imprecision: segext is assigned at line 368 *after* the free at 367, but the explanation that segext ends up dangling is correct."
+  },
+  "vastdb": {
+    "correct": true,
+    "score": 9,
+    "reason": "Correctly identifies CWE-416 UAF in dasher_configure_pid with the same root cause: gf_filter_pid_set_property_full frees value->value.string (NO_COPY type) when equal to existing, leaving segext dangling for later strcmp at lines 399/411. Accurate trigger path covering both caps-query and else branches. Minor imprecision on timing similarly to baseline."
+  }
+}

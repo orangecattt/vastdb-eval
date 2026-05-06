@@ -1,0 +1,26 @@
+## Root Cause
+
+The vulnerability is a double free (CWE-415) involving the global `chains` variable. In function `get_num_dynamic_syms()` at lines 509-512, when `chains` is freed, the code incorrectly assigns `buckets = NULL` instead of `chains = NULL` due to a typo. This leaves `chains` pointing to freed memory without being nullified. Later, in `process_symbol_table()` at lines 1606-1607, the code attempts to free `chains` again, triggering the double free.
+
+## Trigger Path
+
+1. `bad.c:1278` `process_object`
+   - Entry point that orchestrates processing of an ELF file; calls `process_dynamic_section` and `process_symbol_table`
+
+2. `bad.c:1335` `process_dynamic_section`
+   - Processes the dynamic section; calls `get_num_dynamic_syms` at line 741 to read hash table data (DT_HASH)
+
+3. `bad.c:460` `get_num_dynamic_syms`
+   - Reads dynamic hash table data; allocates buckets and chains via `get_dynamic_data`
+
+4. `bad.c:509-512` (inside `get_num_dynamic_syms` at `no_hash` label)
+   - **First free**: frees `chains`, then incorrectly sets `buckets = NULL` instead of `chains = NULL`; the freed pointer remains in `chains`
+
+5. `bad.c:1345` (back in `process_object`)
+   - Calls `process_symbol_table` to process symbol tables and histogram
+
+6. `bad.c:1454` `process_symbol_table`
+   - Processes symbol table; if histogram is enabled, frees buckets and chains
+
+7. `bad.c:1606-1607` (inside `process_symbol_table`)
+   - **Second free / sink**: attempts to free `chains` again - this is the double free trigger since `chains` was not set to NULL in step 4

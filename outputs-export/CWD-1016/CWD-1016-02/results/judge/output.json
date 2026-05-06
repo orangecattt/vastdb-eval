@@ -1,0 +1,12 @@
+{
+  "baseline": {
+    "correct": true,
+    "score": 8,
+    "reason": "Correctly identifies FILTER_INTRA() macro with negative offsets (mrefs/prefs/mrefs3/prefs3) as root cause, and insufficient h<3 check in config_props. Trigger path (config_props→filter→filter_slice→filter_intra) is accurate. Minor imprecision: says 'read/write' but actual OOB is on cur reads (writes go to separate dst buffer). Less specific on exact conditions (y+df vs td->h) that produce negative offsets."
+  },
+  "vastdb": {
+    "correct": true,
+    "score": 9,
+    "reason": "Accurately identifies FILTER_INTRA() macro with negative offsets as root cause, correctly notes the insufficient h<3 boundary check, and provides more specific condition details (y+df >= td->h, y <= df-1) that trigger negative offset computation. Trigger path is precise and complete. Slight imprecision on CWE-787 classification (OOB is on reads, not writes on cur buffer), but this matches the CVE metadata. No unsupported speculation."
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "baseline": {
+    "correct": true,
+    "score": 8,
+    "reason": "Correctly identifies the memory leak of thread_avctx allocated at line 1506 and not freed on the fail path. Accurate root cause and trigger path. Slightly basic but no errors."
+  },
+  "vastdb": {
+    "correct": true,
+    "score": 8,
+    "reason": "Correctly identifies the same memory leak with slightly more detail in the trigger path (source at line 1506, sink at 1540, failure points listed). Accurate and no unsupported speculation."
+  }
+}

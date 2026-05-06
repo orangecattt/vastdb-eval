@@ -1,0 +1,12 @@
+{
+  "baseline": {
+    "correct": false,
+    "score": 0,
+    "reason": "Output contains only a literal bash command with no vulnerability analysis whatsoever."
+  },
+  "vastdb": {
+    "correct": false,
+    "score": 3,
+    "reason": "Identifies the vulnerable loop in filter_slice but mischaracterizes the bug as an off-by-one error. Misses both the negative-index root cause (FFMAX guards prevent negative block_pos_right when block_size > dimensions) and the under-allocation fix (FFALIGN on num/den alloc). Contains irrelevant speculation about block_matching being unimplemented."
+  }
+}

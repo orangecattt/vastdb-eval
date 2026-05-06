@@ -1,0 +1,27 @@
+## Root Cause
+
+In the `OPENSSL_uni2utf8` function at bad.c:135, the second loop (lines 168-175) lacks error handling for `bmp_to_utf8` return values. When `bmp_to_utf8` returns a negative value (indicating an error, e.g., insufficient input bytes), the code still executes `asclen += j` at line 174, incorrectly treating the negative error code as a valid byte count. This corrupts the `asclen` offset, causing subsequent operations to use a wrong buffer position. The out-of-bounds write occurs at line 179 (`asctmp[asclen] = '\0'`) when `asclen` becomes negative or otherwise incorrect due to the accumulated negative value.
+
+## Trigger Path
+
+1. `bad.c:135` `OPENSSL_uni2utf8`
+   - Entry point function that converts UTF-16 to UTF-8
+   - First loop (lines 144-158) calculates buffer size with error checking
+   - Allocates buffer at line 164 based on calculated size
+   - Second loop (lines 168-175) writes UTF-8 data WITHOUT error checking - this is where the vulnerability lies
+
+2. `bad.c:169` `bmp_to_utf8` call
+   - Called in the second loop to convert each UTF-16 character
+   - Returns positive byte count on success, negative value (-1) on error (insufficient input bytes)
+   - In the vulnerable code, its return value is used without validation
+
+3. `bad.c:174` `asclen += j`
+   - The known vulnerable location
+   - When `j` is negative (error return from `bmp_to_utf8`), this decreases `asclen` instead of increasing it
+   - Corrupts the buffer offset calculation
+
+4. `bad.c:179` `asctmp[asclen] = '\0'`
+   - Writes null terminator at corrupted `asclen` position
+   - Results in out-of-bounds write when `asclen` is negative or incorrect due to accumulated negative values from line 174
+
+**Note**: VAST DB shows no direct callers of `OPENSSL_uni2utf8` within this compilation unit - the function would be triggered by external code calling this library function with input that causes `bmp_to_utf8` to fail in the second loop (e.g., malformed UTF-16 with insufficient bytes).

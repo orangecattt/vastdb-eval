@@ -1,0 +1,10 @@
+## Root Cause
+
+The vulnerability is a memory leak (CWE-401) in `glutAddSubMenu` at line 276. Memory is allocated for `menuEntry` via `calloc`, but when `fgState.ActiveMenus` is non-zero (indicating menus are currently in use), the function calls `fgError()` at line 281, which invokes `fgDeinitialize()` and then `exit(1)` at lines 263-266. Since `exit()` terminates the program immediately, the allocated memory for `menuEntry` is never freed, causing a missing release of memory after effective lifetime.
+
+## Trigger Path
+
+1. `bad.c:270` `glutAddSubMenu`
+   - This is the external entry point for this test case. It allocates `menuEntry` at line 276, then checks `fgState.ActiveMenus` at line 280. If non-zero, control flows to `fgError` which exits the program without freeing the allocated memory.
+
+Note: This is a partial source file representing a library function. The actual external/top-level caller (e.g., user application code calling `glutAddSubMenu`) is not present in this test case, so I cannot determine additional stack frames beyond the function itself.

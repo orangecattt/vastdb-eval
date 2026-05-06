@@ -1,0 +1,12 @@
+{
+  "baseline": {
+    "correct": true,
+    "score": 8,
+    "reason": "Correctly identifies the calloc-before-guard ordering as the root cause and traces the fgError/exit path. Misses that freeglut_return_if_fail at lines 279/283 also leak the same allocation."
+  },
+  "vastdb": {
+    "correct": true,
+    "score": 8,
+    "reason": "Same accurate analysis of the calloc-before-guard ordering and fgError/exit leak path with a more detailed trigger-path breakdown. Misses the same early-return leak paths."
+  }
+}

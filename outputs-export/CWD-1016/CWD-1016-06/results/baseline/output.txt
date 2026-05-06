@@ -1,0 +1,22 @@
+Based on my analysis of the code:
+
+## Root Cause
+
+The vulnerability stems from the unconditional assignment `s->planeheight[0] = s->planeheight[3] = inlink->h` at line 555, which sets `planeheight[3]` even when the pixel format has fewer than 4 planes (e.g., YUV420P has only 3 planes). The `planeheight` array has 4 elements (indices 0-3), but `nb_planes` (computed at line 557) may be less than 4. When `deinterlace_slice` later uses `s->planeheight[plane]` at line 728 to compute job distribution for planes that don't exist in the format, it uses an improperly set value. This flows to the filter functions which access memory based on the height calculations, ultimately leading to the out-of-bounds write at line 537 in `filter16_complex_low` where `in_lines_cur[0-3]` are dereferenced without validating they point within valid frame buffers.
+
+## Trigger Path
+
+1. `ffmpeg_filter_framework` (external entry point, not in codebase)
+   - Calls `filter_frame` with an input frame
+
+2. `bad.c:736` `filter_frame`
+   - Receives frame, manages buffer rotation (prev/cur/next), calls `filter(ctx, 0)` and `filter(ctx, 1)`
+
+3. `bad.c:696` `filter`
+   - Allocates output buffer, iterates over planes in loop at line 726-728, calls `deinterlace_slice` via `ctx->internal->execute`
+
+4. `bad.c:591` `deinterlace_slice`
+   - Uses `s->planeheight[plane]` at line 607 and 728 to determine height for job distribution, passes `in_lines_cur` array to filter functions
+
+5. `bad.c:525` `filter16_complex_low`
+   - Accesses `in_lines_cur[0]`, `[1]`, `[2]`, `[3]` at lines 537-540, performing the out-of-bounds write when indices exceed valid plane data

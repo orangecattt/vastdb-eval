@@ -1,0 +1,12 @@
+{
+  "baseline": {
+    "correct": true,
+    "score": 7,
+    "reason": "Correctly identifies CWE-476, the source (line 951 MOVE_ADDRESS) and sink (line 2196 sym->section). Trigger path via copy_file/bfd_close/swap_std_reloc_out is valid though misses the input-side setup path. Does not specifically identify the off-by-one in the bounds check (> vs >=) as root cause, instead generically attributing to lack of section validation."
+  },
+  "vastdb": {
+    "correct": true,
+    "score": 8,
+    "reason": "Correctly identifies CWE-476, source, sink, and provides a more complete trigger path tracing both input (copy_object→slurp_reloc_table→swap_std_reloc_in) and output (squirt_out_relocs→swap_std_reloc_out) flows. Slightly better than baseline but also misses the precise off-by-one bounds check error as the root cause."
+  }
+}

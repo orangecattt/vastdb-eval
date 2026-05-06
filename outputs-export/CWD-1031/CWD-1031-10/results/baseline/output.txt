@@ -1,0 +1,18 @@
+## Root Cause
+
+The vulnerability is in the `FIREqualizerContext` struct's `dump_buf` pointer. At line 886, `s->dump_buf` is allocated only when `s->dumpfile` is set (via the condition at line 882). However, the allocation can fail and return NULL (if `av_malloc_array` encounters memory allocation failure), or `s->dumpfile` could be set but the condition at line 692 could still evaluate to true (if `!s->dump_buf` is true). After logging a warning at line 693, the code does NOT return early—it continues execution. Later, at line 786, `dump_fir` is called when `dump_fp` is non-NULL (file opened successfully), but `s->dump_buf` may still be NULL. In `dump_fir` at line 646, the code dereferences `s->dump_buf[i]` without checking for NULL, causing a NULL pointer dereference.
+
+## Trigger Path
+
+1. `bad.c:802` `config_input`
+   - Entry point that configures the filter. Calls `generate_kernel` at line 906.
+
+2. `bad.c:658` `generate_kernel`
+   - Called with filter context. At line 692, checks `s->dumpfile && (!s->dump_buf || ...)` but only logs a warning without returning on failure. At line 786, calls `dump_fir(ctx, dump_fp, ch)` when `dump_fp` is non-NULL, but `s->dump_buf` may be NULL.
+
+3. `bad.c:599` `dump_fir`
+   - At line 646 (the sink), dereferences `s->dump_buf[i]` without NULL check:
+   ```c
+   ya = s->dump_buf[i];
+   ```
+   This triggers the NULL pointer dereference CWE-476.

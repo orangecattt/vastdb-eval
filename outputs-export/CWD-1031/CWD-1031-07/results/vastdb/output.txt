@@ -1,0 +1,20 @@
+## Root Cause
+
+The vulnerability is a NULL pointer dereference (CWE-476). At `bad.c:679`, `avformat_new_stream(s, NULL)` is called in a loop to create streams, but its return value is completely ignored. When `avformat_new_stream` fails (e.g., due to memory allocation failure for the stream's `codecpar` structure), it returns NULL. The code does not check for this failure, so a stream with a NULL `codecpar` pointer may exist in the format context. Later, at `bad.c:712`, the sink `st->codecpar->codec_tag = tmp` dereferences the NULL `codecpar`, triggering the NULL pointer dereference.
+
+## Trigger Path
+
+1. `bad.c:802` `nut_read_header`
+   - Entry point that parses the NUT format container header. Calls `decode_main_header` to initialize stream array.
+
+2. `bad.c:818` `nut_read_header` → `decode_main_header`
+   - Calls `decode_main_header` in a do-while loop to parse main header and create streams.
+
+3. `bad.c:517` `decode_main_header`
+   - Parses the main header. At line 679, calls `avformat_new_stream(s, NULL)` in a for loop but discards the return value, leaving potential NULL streams unhandled.
+
+4. `bad.c:821` `nut_read_header` → `decode_stream_header`
+   - After `decode_main_header` returns, loops based on `s->nb_streams` and calls `decode_stream_header` for each stream to parse stream headers.
+
+5. `bad.c:692` `decode_stream_header`
+   - Receives the stream context. At line 706, retrieves `st = s->streams[stream_id]` and checks if NULL, but at line 712 accesses `st->codecpar->codec_tag` without verifying `codecpar` is non-NULL. If `avformat_new_stream` succeeded in creating `st` but failed to allocate `codecpar`, this dereferences NULL.

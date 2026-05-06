@@ -1,0 +1,10 @@
+## Root Cause
+
+The vulnerability stems from an integer underflow when calculating `nb_samples` at line 419: `nb_samples = ff_inlink_queued_samples(ctx->inputs[0]) - s->nb_samples;`. When `ff_inlink_queued_samples(ctx->inputs[0])` is less than `s->nb_samples`, the subtraction underflows (the function returns `int` but internally operates on `uint64_t`). The crossfade sink at lines 448-451 then uses `s->nb_samples` directly without validating that both input[0] and input[1] have sufficient queued samples. When `s->overlap` is true, the code attempts to consume `s->nb_samples` from each input at lines 436 and 442, but if either input has fewer samples than `s->nb_samples`, the buffers allocated for `cf[0]` and `cf[1]` will be smaller than expected. The subsequent `crossfade_samples` call then writes out-of-bounds because it iterates based on `s->nb_samples` regardless of actual buffer sizes.
+
+## Trigger Path
+
+1. `bad.c:389` `activate`
+   - Entry point for filter activation; checks queued samples on inputs[0] and inputs[1]
+   - If condition at line 430 is true (`ff_inlink_queued_samples(ctx->inputs[1]) >= s->nb_samples`) and `s->overlap` is enabled, flows to crossfade path at line 431
+   - Calls `ff_inlink_consume_samples` at lines 436 and 442 to get input frames, then invokes vulnerable `crossfade_samples` at line 448

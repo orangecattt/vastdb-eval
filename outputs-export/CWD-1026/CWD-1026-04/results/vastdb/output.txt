@@ -1,0 +1,22 @@
+Based on my analysis of the code and VAST DB evidence, I can now provide the complete analysis.
+
+## Root Cause
+
+The vulnerability is a **double-free** (a variant of Use After Free). In `WriteMSLImage`, the image pointer `msl_image` is created via `CloneImage` at line 1231, then its address (`&msl_image`) is passed to `ProcessMSLScript`. Inside `ProcessMSLScript`, at line 1284, the original image (`*image` which is `msl_image`) is stored into `msl_info.image` array via `MSLPushImage`. When `ProcessMSLScript` returns, it calls `DestroyMSLInfo` at line 1325 which iterates through and frees all images in `msl_info.image`, including the original `msl_image` that was pushed. Control returns to `WriteMSLImage`, which then calls `DestroyImage(msl_image)` at line 1233 on the already-freed memory, triggering the double-free vulnerability.
+
+## Trigger Path
+
+1. `bad.cpp:1220` `WriteMSLImage`
+   - Entry point function. Creates a cloned image: `msl_image = CloneImage(image,0,0,MagickTrue,exception)` at line 1231
+
+2. `bad.cpp:1232` (inside `WriteMSLImage`) - `ProcessMSLScript` call
+   - Passes address of local variable `&msl_image` to `ProcessMSLScript`. The MLIR data confirms this via `hl.addressof` operation at uid 16593
+
+3. `bad.cpp:1284` (inside `ProcessMSLScript`) - `MSLPushImage` call
+   - Pushes the dereferenced `*image` (the original `msl_image` from caller) into `msl_info.image` array
+
+4. `bad.cpp:1325` (inside `ProcessMSLScript`) - `DestroyMSLInfo` call
+   - VAST DB confirms this is `DestroyMSLInfo(_MSLInfo *)` at uid 16223. Frees all images in `msl_info.image` including the one pushed at line 1284 (the caller's `msl_image`)
+
+5. `bad.cpp:1233` (back in `WriteMSLImage`) - `DestroyImage` call  
+   - Attempts to free `msl_image` again after it was already freed in step 4. VAST DB shows this is `hl.call` at uid 16610 calling `DestroyImage(_Image *)`

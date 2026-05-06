@@ -1,0 +1,28 @@
+Based on my analysis of the code, I have sufficient information to explain the vulnerability. Let me provide my findings:
+
+## Root Cause
+
+The vulnerability is a CWE-415 Double Free in `ICUService::getKey`. When `serviceCache->put()` fails internally (e.g., due to memory allocation error at `bad.cpp:706`), the internal function `_uhash_put` calls the `valueDeleter` (which is `cacheDeleter`) to free the value at `bad.cpp:158`. However, the caller `ICUService::getKey` still checks `U_FAILURE(status)` after the call returns and executes `delete result` at `bad.cpp:832`, causing a second free of the same `CacheEntry` pointer.
+
+## Trigger Path
+
+1. `bad.cpp:729` `ICUService::getKey`
+   - Entry point; calls `serviceCache->put()` with a `CacheEntry*` result
+
+2. `bad.cpp:292` `Hashtable::put`
+   - Calls `uhash_put(hash, new UnicodeString(key), value, &status)` where value is the CacheEntry*
+
+3. `bad.cpp:643` `uhash_put` (public API)
+   - Wraps internal `_uhash_put` with key/value holders
+
+4. `bad.cpp:657` `_uhash_put` (internal implementation)
+   - On memory allocation failure at line 706, sets `status = U_MEMORY_ALLOCATION_ERROR` and jumps to `err:` label
+   
+5. `bad.cpp:722` `_uhash_put` error handler
+   - Calls `HASH_DELETE_KEY_VALUE(hash, key.pointer, value.pointer);`
+   - This invokes `(*hash->valueDeleter)(valuepointer)` at line 158 (first free via cacheDeleter→unref)
+
+6. `bad.cpp:831-832` `ICUService::getKey` error handling
+   - After `put()` returns with failed status, checks `U_FAILURE(status)` and executes `delete result;` (second free)
+
+The VAST DB query confirmed the existence of these functions in the database with the delete operations at line 832 (`hl.delete` at location `[F, bad.cpp, 832, 21]`) and the `cacheDeleter` function at line 589, but the internal call relationships were not fully traversable in the MLIR representation.

@@ -1,0 +1,12 @@
+{
+  "baseline": {
+    "correct": true,
+    "score": 10,
+    "reason": "Accurately identifies CWE-401 memory leak in DlgCreate8: buf allocated via vsmprintf at line 353, never freed before return(NULL) at line 357 when screen_display==NULL. Correctly contrasts with the normal path (lines 359-360) where buf is freed, and identifies the fix. No unsupported speculation."
+  },
+  "vastdb": {
+    "correct": true,
+    "score": 10,
+    "reason": "Accurately identifies CWE-401 memory leak in DlgCreate8 at the same location. Correctly pinpoints the allocation (line 353), the missing free(buf) before return(NULL) at line 357, and references the exact fix in good.c:357. No unsupported speculation."
+  }
+}

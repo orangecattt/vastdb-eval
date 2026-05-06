@@ -1,0 +1,17 @@
+## Root Cause
+
+In `dwa_uncompress`, the value `dc_count` is read from untrusted input at line 1087 (`dc_count = AV_RL64(src + 72)`). This value is used to compute `dest_len = dc_count * 2LL` at line 1135, which determines the allocation size passed to `av_fast_padded_malloc` at line 1141. The intended validation at line 1138 (`if (dc_count > (6LL * td->xsize * td->ysize + 63) / 64)`) has an integer overflow vulnerability: `td->xsize * td->ysize` is computed as `int` multiplication first, which can overflow before being promoted to `int64_t`. This causes the validation to incorrectly pass, allowing a large `dc_count` to allocate insufficient memory, leading to a heap buffer overflow when decompression writes beyond the allocated buffer.
+
+## Trigger Path
+
+1. `bad.c:570` `decode_frame`
+   - Entry point receiving `AVPacket` with EXR image data. Calls `decode_block` via the `execute2` function pointer at line 737.
+
+2. `bad.c:737` `indirect_call` (to `decode_block`)
+   - The `avctx->execute2` call dispatches to `decode_block` for parallel processing of image blocks/tiles.
+
+3. `bad.c:506` `decode_block`
+   - Decodes individual scanlines/tiles. At line 918, when `s->compression` is `EXR_DWAA` or `EXR_DWAB`, calls `dwa_uncompress` with compressed data, sizes, and thread data.
+
+4. `bad.c:504` `dwa_uncompress`
+   - At line 1087, reads `dc_count` from untrusted input at `src + 72`. At line 1141, uses this value to allocate `td->dc_data` buffer via `av_fast_padded_malloc`. The integer overflow in the validation at line 1138 allows oversized `dc_count` to pass, resulting in undersized allocation and subsequent buffer overflow during decompression at lines 1145-1150.

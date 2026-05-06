@@ -1,0 +1,12 @@
+{
+  "baseline": {
+    "correct": true,
+    "score": 10,
+    "reason": "Accurately identifies the memory leak of GF_PropertyMap when src_props is NULL triggers early return at line 893 without freeing dst_props. Correctly traces allocation through check_new_pid_props -> gf_props_new -> GF_SAFEALLOC. No unsupported speculation."
+  },
+  "vastdb": {
+    "correct": true,
+    "score": 10,
+    "reason": "Accurately identifies the memory leak root cause (CWE-401), correctly traces the allocation path and the early-return sink at line 893. Slightly more concise than baseline but equally correct. No unsupported speculation."
+  }
+}

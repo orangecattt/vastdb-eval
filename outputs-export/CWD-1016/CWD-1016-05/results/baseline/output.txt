@@ -1,0 +1,22 @@
+Based on my analysis of the code, I can now provide the explanation.
+
+## Root Cause
+
+The vulnerability stems from improper initialization of plane dimensions in the `EdgeDetectContext` structure. In `config_props` (line 193), `plane->width` is computed as `AV_CEIL_RSHIFT(inlink->w, hsub)` where `hsub` is derived from the chroma subsampling values in the pixel format descriptor. For multi-plane formats like YUV420P, the code iterates and allocates buffers for all planes (lines 188-200). However, if the actual input frame has more planes than `nb_planes` indicates, or if the format descriptor's `log2_chroma_w` value is manipulated/inconsistent, the computed width for chroma planes (planes[1], planes[2]) can be incorrect. When `filter_frame` later uses this potentially incorrect `plane->width` value to process data with `gaussian_blur`, the out-of-bounds write occurs at `dst[1] = src[1]` (line 216) because the buffer was allocated based on the (potentially wrong) computed width, but operations assume different dimensions.
+
+## Trigger Path
+
+1. `bad.c:180` `config_props`
+   - Computes `plane->width` using `AV_CEIL_RSHIFT(inlink->w, hsub)` where `hsub = desc->log2_chroma_w` for each plane
+   - Allocates buffers using computed dimensions
+   - Returns control to the filter system after setting up plane dimensions
+
+2. `bad.c:250` `filter_frame`
+   - Called by the filter framework when a frame needs processing
+   - Iterates through planes using `nb_planes` and retrieves `width` from `plane->width`
+   - Passes `width` and other parameters to `gaussian_blur` function
+
+3. `bad.c:204` `gaussian_blur`
+   - Receives `width` parameter (originally from `plane->width` at line 275)
+   - Uses `width` for buffer operations and loop bounds
+   - The sink operation `dst[1] = src[1]` at line 216 accesses memory based on this width value, which can be incorrect if the source computation was flawed, leading to out-of-bounds write

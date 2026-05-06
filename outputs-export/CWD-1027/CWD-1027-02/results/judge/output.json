@@ -1,0 +1,12 @@
+{
+  "baseline": {
+    "correct": true,
+    "score": 10,
+    "reason": "Accurately identifies the root cause (tile->out_ref allocated at line 230 via ff_get_video_buffer but never freed in uninit), the exact vulnerable location, and the trigger path (filter_frame allocates/uninit leaks). No unsupported speculation."
+  },
+  "vastdb": {
+    "correct": true,
+    "score": 10,
+    "reason": "Accurately identifies CWE-401 root cause, the allocation site at line 230, and the missing av_frame_free in uninit. Correctly describes the callback-based trigger path. No unsupported speculation."
+  }
+}

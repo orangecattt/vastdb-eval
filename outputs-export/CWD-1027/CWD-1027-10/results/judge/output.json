@@ -1,0 +1,12 @@
+{
+  "baseline": {
+    "correct": true,
+    "score": 9,
+    "reason": "Accurately identifies the memory leak in streamGetEdgeID due to missing streamIteratorStop call. Correctly traces the allocation path through streamIteratorStart → raxStart → raxStackInit and notes that streamIteratorGetID may trigger heap allocation in raxStack. No speculation or inaccuracies."
+  },
+  "vastdb": {
+    "correct": true,
+    "score": 8,
+    "reason": "Accurately identifies the memory leak in streamGetEdgeID and the missing streamIteratorStop call. Correctly identifies source (line 423) and sink (line 430). Slightly less detail on the heap allocation mechanism in raxStack but still fully correct with no speculation."
+  }
+}

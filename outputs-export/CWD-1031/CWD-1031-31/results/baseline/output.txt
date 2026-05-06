@@ -1,0 +1,17 @@
+## Root Cause
+
+The vulnerability is a null pointer dereference (CWE-476) occurring in the `fim_alert` function at line 510. The `oldsum` and `newsum` structures of type `sk_sum_t` (which contains pointer fields like `md5`, `sha1`, etc.) are initialized using `memset(&oldsum, 0, sizeof(sk_sum_t))` at line 691 in `fim_db_search`. This zeros out all memory, setting all `char*` pointers (including `md5`, `sha1`, `sha256`) to NULL. Later, at line 510 in `fim_alert`, the code dereferences these pointers with `!*newsum->md5` and `!*oldsum->md5` without checking if they are NULL, causing a null pointer dereference when these pointers are accessed.
+
+## Trigger Path
+
+1. `bad.c:673` `fim_db_search`
+   - Entry point that allocates and initializes `oldsum` and `newsum` structures on the stack
+
+2. `bad.c:691-692` (within `fim_db_search`)
+   - `memset(&oldsum, 0, sizeof(sk_sum_t))` and `memset(&newsum, 0, sizeof(sk_sum_t))` zero-initialize the structures, setting all pointer fields to NULL
+
+3. `bad.c:874` (within `fim_db_search`)
+   - Calls `fim_alert(f_name, &oldsum, &newsum, lf, sdb, event_type)` passing the stack-allocated structures with NULL pointers
+
+4. `bad.c:510` `fim_alert`
+   - The vulnerable sink: `if (!*newsum->md5 || !*oldsum->md5 || strcmp(newsum->md5, oldsum->md5) == 0)` attempts to dereference NULL pointers `newsum->md5` and `oldsum->md5`, triggering the null pointer dereference.

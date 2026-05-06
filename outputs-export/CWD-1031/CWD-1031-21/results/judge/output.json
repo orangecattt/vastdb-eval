@@ -1,0 +1,12 @@
+{
+  "baseline": {
+    "correct": true,
+    "score": 10,
+    "reason": "Accurately identifies the NULL dereference in VarNameStoreRegister (line 266) via DetectEngineBufferTypeGetNameById returning NULL, with correct data-flow from DetectEntropySetup. No speculation or errors."
+  },
+  "vastdb": {
+    "correct": true,
+    "score": 10,
+    "reason": "Correctly identifies the same NULL-dereference root cause, adds useful detail about user-controlled sm_list via s->init_data->list and sticky-buffer path. Accurate and complete."
+  }
+}

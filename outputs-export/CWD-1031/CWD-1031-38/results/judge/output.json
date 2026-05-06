@@ -1,0 +1,12 @@
+{
+  "baseline": {
+    "correct": true,
+    "score": 9,
+    "reason": "Accurately identifies CWE-476 null pointer dereference in mk_http_range_parse with correct trigger path: mk_string_copy_substr returns NULL when eq_pos+1 > sep_pos, then buffer is passed to atol() without NULL check. Minor omission: does not mention memory allocation failure as a second potential NULL return path."
+  },
+  "vastdb": {
+    "correct": true,
+    "score": 10,
+    "reason": "Accurately identifies CWE-476 null pointer dereference with thorough root cause and trigger path. Covers both NULL return scenarios from mk_string_copy_substr (pos_init>pos_end and malloc failure). Provides supporting VAST DB data-flow evidence. No unsupported speculation."
+  }
+}

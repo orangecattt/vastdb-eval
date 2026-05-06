@@ -1,0 +1,12 @@
+{
+  "baseline": {
+    "correct": false,
+    "score": 5,
+    "reason": "Correctly identifies the NULL propagation mechanism from PAT gather_section(ses=NULL) through section_complete into packet.stream, but incorrectly identifies the crash location as the PCR handler (line 1055). The fix is in the ID3 handler (line 1196), not the PCR handler. The PCR handler has a gf_fatal_assert(pck->stream) guard at line 1044, making it a controlled assertion failure, not a raw NULL dereference as described."
+  },
+  "vastdb": {
+    "correct": false,
+    "score": 7,
+    "reason": "Correctly identifies the source (PAT gather_section with NULL ses), the propagation through section_complete setting pck.stream=NULL, and correctly identifies the ID3 handler (line 1196) as a vulnerable sink matching the test case fix location. However, claims event 24 (CAT_FOUND) from section_complete reaches the ID3 handler, which is wrong — event 24 has no case handler and falls through silently. Also incorrectly includes SCTE35 (line 1232) which is unfixed in this test case."
+  }
+}

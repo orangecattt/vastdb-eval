@@ -1,0 +1,14 @@
+## Root Cause
+
+The vulnerability is in the `handle_eac3` function in `movenc.c` (simplified test case). The `substreamid` field is parsed from the bitstream at line 593 using `get_bits(gbc, 3)`, which reads 3 bits and can produce values 0-7. However, the `info->substream` array is defined with only 1 element (line 248: `substream[1]`). At line 448, `hdr->substreamid` is used as an array index without any bounds validation. When `hdr->substreamid >= 1`, this causes an out-of-bounds array access (CWE-129).
+
+## Trigger Path
+
+1. `bad.c:400` `handle_eac3`
+   - Entry point that processes E-AC3 audio packets. Calls `avpriv_ac3_parse_header` to parse the AC3 header and then uses `hdr->substreamid` to index into `info->substream`.
+
+2. `bad.c:412` `avpriv_ac3_parse_header`
+   - Parses the AC3 header from the bitstream. At line 593, reads `hdr->substreamid = get_bits(gbc, 3)` where 3 bits can produce values 0-7. Returns the parsed header back to `handle_eac3`.
+
+3. `bad.c:448` (sink)
+   - `info->substream[hdr->substreamid].fscod = hdr->sr_code;` - Uses the unvalidated `substreamid` as array index, causing out-of-bounds access when value >= 1.

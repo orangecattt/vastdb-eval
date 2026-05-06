@@ -1,0 +1,12 @@
+{
+  "baseline": {
+    "correct": true,
+    "score": 10,
+    "reason": "Accurately identifies the memory leak: allocation at line 407 via av_iamf_param_definition_alloc, the missing av_free(param) before the return AVERROR_INVALIDDATA at line 449, and the exact condition (!mode && !constant_subblock_duration && total_duration != duration). Concise, no speculation."
+  },
+  "vastdb": {
+    "correct": true,
+    "score": 10,
+    "reason": "Accurately identifies CWE-401, the allocation point, the missing av_free at line 449, the exact trigger condition, and correctly notes other error paths handle the free. The remark about the static function and higher-level callers is factual, not speculation."
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "baseline": {
+    "correct": false,
+    "score": 1,
+    "reason": "Describes double-free order backwards (claims VIM_CLEAR first then vim_free second, but ASAN shows vim_free first then VIM_CLEAR second). Completely misses the quickfix list (qf_free_all) which is the actual trigger for the second free. The described path (mark_forget_file -> tagstack_clear_entry -> win_free) cannot cause double-free because VIM_CLEAR NULLs the pointer."
+  },
+  "vastdb": {
+    "correct": false,
+    "score": 1,
+    "reason": "Same fundamental error as baseline: wrong ordering and wrong trigger path. Also adds incorrect speculation about popup windows (win_free_popup) which does not match the ASAN stack trace showing entry through ex_bunload/win_close. Completely misses the quickfix list (qf_free_all) which is the actual mechanism for the second free."
+  }
+}

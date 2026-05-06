@@ -1,0 +1,12 @@
+{
+  "baseline": {
+    "correct": true,
+    "score": 8,
+    "reason": "Correctly identifies insufficient bounds validation on untrusted dc_count (CWE-129) and the out-of-bounds read at dc[idx] in line 1188. Slightly imprecise about the bound check—the issue is a loose upper bound allowing mismatched dc_count values, not that exceeding the bound causes the OOB read (since the bound check would reject that case). But the overall root-cause characterization is sound."
+  },
+  "vastdb": {
+    "correct": false,
+    "score": 2,
+    "reason": "Incorrectly claims integer overflow in 'td->xsize * td->ysize' during the validation check. In '6LL * td->xsize * td->ysize', the 6LL literal promotes the entire expression to int64_t, so no int overflow occurs. Also incorrectly claims heap buffer overflow during decompression at lines 1145-1150; the real issue is CWE-129 out-of-bounds array read at line 1188 due to improper index validation."
+  }
+}

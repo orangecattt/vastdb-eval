@@ -1,0 +1,11 @@
+## Root Cause
+
+The vulnerability exists in the `gaussian_blur` function where `memcpy(dst, src, w)` is called with `w` (the pixel width) as the copy size, but the pointers are then advanced by `dst_linesize` and `src_linesize`, which may differ from `w`. In video processing, `linesize` often exceeds width due to memory alignment padding. When `in->linesize[p]` (passed as `src_linesize`) is larger than `width`, the memcpy reads beyond the source buffer's row boundary, and subsequent iterations copy from incorrect memory positions, causing an out-of-bounds write.
+
+## Trigger Path
+
+1. `bad.c:495` `filter_frame`
+   - Gets plane dimensions from `plane->width` and `plane->height` (lines 520-521), then calls `gaussian_blur` passing `width` and `in->linesize[p]` as separate parameters (lines 532-534).
+
+2. `bad.c:454` `gaussian_blur`
+   - Receives `w` (width), `h` (height), and mismatched `dst_linesize` (from tmpbuf) and `src_linesize` (from in->linesize). The memcpy on lines 460-461 uses `w` as size but advances by linesize values, triggering out-of-bounds access when `src_linesize != w`.

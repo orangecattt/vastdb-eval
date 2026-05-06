@@ -1,0 +1,23 @@
+## Root Cause
+
+The vulnerability is a Use After Free in the COFF file handling code of the BFD library. The `obj_coff_strings(abfd)` buffer (the string table allocated during COFF object parsing) is freed in `_bfd_coff_free_symbols()` at line 788, but hash table entries created in `bfd_hash_lookup()` at line 979 still hold pointers to this freed memory via their `string` field. When `_bfd_coff_internal_syment_name()` (line 896) accesses the already-freed string table to look up symbol names, subsequent hash table lookups dereference the dangling pointers in `hashp->string`, triggering the use-after-free.
+
+## Trigger Path
+
+1. `bad.c:2111` `display_file`
+   - Entry point that calls `pe_bfd_object_p` to parse the PE/COFF file, then `coff_get_normalized_symtab`
+
+2. `bad.c:1818` `pe_bfd_object_p`
+   - Initializes PE/COFF file parsing and calls `coff_real_object_p` at line 1914 to process headers and sections
+
+3. `bad.c:1741` `coff_real_object_p`
+   - Processes the COFF file headers and section data, then calls `_bfd_coff_free_symbols` at line 1805 to free the string table
+
+4. `bad.c:778` `_bfd_coff_free_symbols`
+   - Frees the string table at line 788: `free(obj_coff_strings(abfd))`, setting the pointer to NULL but hash table entries still reference the freed buffer
+
+5. `bad.c:883` `_bfd_coff_internal_syment_name`
+   - When looking up long symbol names, accesses the freed string table at line 896 via `obj_coff_strings(abfd)` which is now NULL, then returns NULL
+
+6. `bad.c:968` `bfd_hash_lookup`
+   - The sink at line 979: `strcmp(hashp->string, string)` dereferences `hashp->string` which points to the freed string buffer (the hash entries were populated earlier with pointers into the now-freed string table)

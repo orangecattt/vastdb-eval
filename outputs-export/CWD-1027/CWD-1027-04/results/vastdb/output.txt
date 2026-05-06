@@ -1,0 +1,19 @@
+Now I have enough context from both the code and VAST DB. Let me provide the analysis.
+
+## Root Cause
+
+The vulnerability is a missing memory release (CWE-401) in the `filter_frame` function. At line 813, an `AVFrame *out` is allocated via `ff_get_video_buffer(outlink, outlink->w, outlink->h)`. When `create_filtergraph()` at line 889 fails and returns a negative error code, the function returns early at lines 890-891 without calling `av_frame_free(&out)`, leaking the previously allocated output frame. The input frame `in` is properly freed at lines 820, 825, and 911, but `out` is only freed on success paths (lines 911-913), not on the error path from `create_filtergraph`.
+
+## Trigger Path
+
+1. `bad.c:805` `filter_frame`
+   - This is the top-level entry function that processes video frames. It receives an input frame `in` and must produce an output frame `out`.
+
+2. `bad.c:813` `ff_get_video_buffer` (call)
+   - Called to allocate output frame buffer: `AVFrame *out = ff_get_video_buffer(outlink, outlink->w, outlink->h);`
+
+3. `bad.c:889` `create_filtergraph` (call)
+   - `res = create_filtergraph(ctx, in, out);` - Attempts to create the color conversion filter graph using the allocated `out` frame.
+
+4. `bad.c:890-891` early return without freeing `out`
+   - When `res < 0`, the function returns immediately: `if (res < 0) return res;` - This is the leak point where `out` (allocated at line 813) is not freed before returning.

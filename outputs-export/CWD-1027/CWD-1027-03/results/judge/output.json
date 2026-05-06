@@ -1,0 +1,12 @@
+{
+  "baseline": {
+    "correct": false,
+    "score": 1,
+    "reason": "Fabricates a non-existent root cause: that avio_context_free is 'declared but never implemented'. The real fix adds wtvfile_close(wtv->pb) in the parse_chunks error path at read_header line 710, not an unimplemented function. The baseline completely misses the actual missing cleanup call."
+  },
+  "vastdb": {
+    "correct": true,
+    "score": 6,
+    "reason": "Correctly identifies the CWE-401 memory leak at avio_alloc_context line 491 and the parse_chunks error path (line 709) as the trigger. However, imprecise in describing the location (implies leak is in wtvfile_open_sector vs read_header) and mentions avio_seek at line 714 as another error path, which is wrong (return value not checked in bad.c). Directionally correct but lacks precision on the exact fix location."
+  }
+}

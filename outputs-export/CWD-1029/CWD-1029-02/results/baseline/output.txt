@@ -1,0 +1,20 @@
+## Root Cause
+
+The vulnerability is a CWE-119 out-of-bounds read in the BFD library's relocation handling. At line 900, the pointer `p` is computed as `data + (*parent)->address * bfd_octets_per_byte(input_bfd)`, where `(*parent)->address` is read from relocation entries in an external ELF file and is therefore attacker-controlled. No bounds checking is performed to verify that this computed offset stays within the `data` buffer's limits. When `_bfd_clear_contents` is called with `p` at line 901, it internally calls `read_reloc` which invokes `bfd_get_8` at line 784 to read from the potentially out-of-bounds memory location, triggering the buffer over-read vulnerability.
+
+## Trigger Path
+
+1. `bad.c:830` `bfd_generic_get_relocated_section_contents`
+   - Top-level entry point that processes linked sections. It obtains section contents into `data` and iterates through relocations, passing control to the relocation handling loop at line 866.
+
+2. `bad.c:866` (within `bfd_generic_get_relocated_section_contents`)
+   - The for loop iterates over each relocation entry in `reloc_vector`. For each `*parent`, it computes a pointer `p` at line 900 and calls `_bfd_clear_contents` at line 901.
+
+3. `bad.c:809` `_bfd_clear_contents`
+   - Called with the computed pointer `p` as the `location` parameter. It invokes `read_reloc` at line 814 to read the relocation value from memory.
+
+4. `bad.c:779` `read_reloc`
+   - Receives the potentially out-of-bounds pointer as its `data` parameter. Based on the howto size, it calls `bfd_get_8` at line 784 to read a byte from the unchecked pointer.
+
+5. `bad.c:784` `bfd_get_8` (sink)
+   - Performs the actual memory read from the attacker-controlled offset, causing an out-of-bounds read when the offset exceeds the buffer boundary.

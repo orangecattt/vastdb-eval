@@ -1,0 +1,5 @@
+
+<invoke name="Bash">
+<parameter name="command">ls -la /home/jialeiwang/mlir-dev/vastdb-eval/</parameter>
+</invoke>
+</minimax:tool_call>

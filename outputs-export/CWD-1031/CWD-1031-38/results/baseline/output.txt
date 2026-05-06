@@ -1,0 +1,18 @@
+Based on my analysis of the code:
+
+## Root Cause
+
+The vulnerability is a **NULL pointer dereference (CWE-476)** in the `mk_http_range_parse` function. At line 339, `mk_string_copy_substr(sr->range.data, eq_pos + 1, sep_pos)` can return NULL when `eq_pos + 1 > sep_pos` (i.e., the start position exceeds the end position), because the function returns NULL when `pos_init > pos_end` (see lines 281-283). At line 340, `buffer` is passed directly to `atol()` without any NULL check, causing a null pointer dereference when the buffer is NULL.
+
+## Trigger Path
+
+I cannot determine the complete function call stack from this code alone, as `mk_http_range_parse` (defined at `bad.c:303`) is not called within this source file. The file contains only the implementation of `mk_http_range_parse` and its helper functions, but does not show the external/top-level entry point that invokes it.
+
+The vulnerable flow **within this file** is:
+
+1. `bad.c:303` `mk_http_range_parse`
+   - This function parses HTTP Range headers from `sr->range.data`
+   - At line 312, finds position of '='; at line 318, finds position of '-'
+   - At line 338, checks `(eq_pos + 1 != sep_pos) && (len > sep_pos + 1)` but does NOT validate that `eq_pos + 1 <= sep_pos`
+   - At line 339, calls `mk_string_copy_substr()` which returns NULL when start > end
+   - At line 340, passes NULL buffer to `atol()` → **NULL pointer dereference**

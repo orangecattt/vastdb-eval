@@ -1,0 +1,12 @@
+{
+  "baseline": {
+    "correct": true,
+    "score": 9,
+    "reason": "Correctly identifies the missing NULL-check after av_malloc() at line 682, the sink at line 527 in render_slice, and the trigger condition (out-of-bounds motion vectors requiring edge emulation). Concise and accurate. Minor omission: does not explicitly mention the VP4 sink at line 513."
+  },
+  "vastdb": {
+    "correct": true,
+    "score": 10,
+    "reason": "Thoroughly and accurately covers all aspects: the unchecked allocation at line 681-682, both sinks at lines 513 (VP4) and 527 (standard MC), the precise edge-emulation trigger conditions, and the full call chain from vp3_decode_frame through render_slice. No unsupported speculation."
+  }
+}

@@ -1,0 +1,20 @@
+## Root Cause
+
+The vulnerability occurs when `nal->data` is NULL and `nal->size` is at least 1. At line 495, `nal->data + 1` is passed to `init_get_bits` as the buffer pointer. Although `init_get_bits` (line 434) has a NULL check that sets `buffer = NULL` and returns an error, the caller `get_last_needed_nal` does not check this return value (line 496). The GetBitContext is still initialized with either a NULL or invalid buffer pointer. When `get_ue_golomb` is called (line 496), it executes `UPDATE_CACHE(re, gb)` at line 458, which dereferences `gb->buffer` to read bits, causing a NULL pointer dereference.
+
+## Trigger Path
+
+1. `bad.c:478` `get_last_needed_nal(H264Context *h)`
+   - Iterates over NAL units and calls `init_get_bits` with potentially invalid `nal->data` pointer without checking return value.
+
+2. `bad.c:495` (inside get_last_needed_nal)
+   - Calls `init_get_bits(&gb, nal->data + 1, (nal->size - 1) * 8)` where `nal->data` may be NULL.
+
+3. `bad.c:428` `init_get_bits(GetBitContext *s, const uint8_t *buffer, int bit_size)`
+   - Detects NULL buffer at line 434 but still initializes `s->buffer = NULL` and returns error without preventing caller from using the context.
+
+4. `bad.c:453` `get_ue_golomb(GetBitContext *gb)`
+   - Called at line 496 without checking if initialization succeeded.
+
+5. `bad.c:458` `UPDATE_CACHE(re, gb)` (sink)
+   - Dereferences `gb->buffer` which is NULL, causing CWE-476 NULL Pointer Dereference.

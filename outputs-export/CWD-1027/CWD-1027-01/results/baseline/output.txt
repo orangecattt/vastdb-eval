@@ -1,0 +1,14 @@
+## Root Cause
+
+The vulnerability is a memory leak in the `AudioCrossoverContext` filter context. At line 418 in `config_input`, memory is dynamically allocated for `s->xover` via `av_calloc(inlink->channels, sizeof(*s->xover))`. However, in the `uninit` function (lines 513-521), only `s->splits` and output pad names are freed—`s->xover` is never released. When the filter is unloaded/destroyed, the allocated memory for the crossover channels is never freed, causing a memory leak (CWE-401).
+
+## Trigger Path
+
+1. `bad.c:459` `init`
+   - Initializes the filter, allocates `splits`, and creates output pads.
+
+2. `bad.c:411` `config_input`
+   - Called when the filter receives input; allocates `s->xover` via `av_calloc` at line 418.
+
+3. `bad.c:513` `uninit`
+   - Called when filter is unloaded/destroyed; frees `s->splits` and pad names but **fails to free `s->xover`**, triggering the memory leak.

@@ -1,0 +1,19 @@
+Now I have enough information to understand the vulnerability. Let me summarize:
+
+## Root Cause
+
+The vulnerability is in `kek_unwrap_key` function. The output length `*outlen` is set directly from the first byte of decrypted data (`tmp[0]`) at line 254 without validating it fits in the caller's buffer. The check at line 250 only ensures `tmp[0] - 4` fits within input length, but doesn't check if `tmp[0]` (the copy size) fits within the output buffer allocated by the caller. At line 255, `memcpy(out, tmp + 4, *outlen)` writes `tmp[0]` bytes into `out`, which may be much smaller than `tmp[0]`, causing an out-of-bounds write (CWE-787).
+
+## Trigger Path
+
+1. `bad.c:263` `ossl_cms_RecipientInfo_pwri_crypt`
+   - Entry function that processes password-based key decryption. Allocates output buffer `key` with size `pwri->encryptedKey->length` at line 352, then calls `kek_unwrap_key` with this buffer.
+
+2. `bad.c:355` call to `kek_unwrap_key`
+   - Passes the pre-allocated `key` buffer and its size to the unwrap function.
+
+3. `bad.c:206` `kek_unwrap_key`
+   - Receives the output buffer `out` and a pointer to store the output length. At line 254, sets `*outlen = (size_t)tmp[0]` using untrusted decrypted data as the copy size without bounds checking against the output buffer size.
+
+4. `bad.c:255` vulnerable memcpy
+   - Executes `memcpy(out, tmp + 4, *outlen)` which can write beyond the bounds of `out` if `*outlen` exceeds the caller's allocated buffer size.

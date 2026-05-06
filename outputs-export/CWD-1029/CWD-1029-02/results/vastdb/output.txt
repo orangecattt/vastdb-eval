@@ -1,0 +1,26 @@
+## Root Cause
+
+The vulnerability is a buffer over-read (CWE-119) in `bfd_generic_get_relocated_section_contents`. At line 900, the pointer `p` is computed as `data + (*parent)->address * bfd_octets_per_byte(input_bfd)` without validating that `(*parent)->address` is within the bounds of the `data` buffer. When `(*parent)->address` contains a malicious value larger than the buffer size, the computed pointer `p` points outside the valid memory region. This out-of-bounds pointer flows through `_bfd_clear_contents` to `read_reloc`, which passes it to `bfd_get_8` at line 784, triggering the out-of-bounds memory read.
+
+## Trigger Path
+
+1. `bad.c:830` `bfd_generic_get_relocated_section_contents`
+   - Entry point that iterates over relocation entries. For each entry, it accesses `(*parent)->address` at line 900.
+
+2. `bad.c:900` (source in `bfd_generic_get_relocated_section_contents`)
+   - Computes pointer `p` using unvalidated `(*parent)->address` from relocation data.
+
+3. `bad.c:901` (call to `_bfd_clear_contents`)
+   - Passes the computed pointer `p` as the `location` parameter to `_bfd_clear_contents`.
+
+4. `bad.c:809` `_bfd_clear_contents`
+   - Receives the potentially out-of-bounds pointer `p` and passes it to `read_reloc`.
+
+5. `bad.c:814` (call to `read_reloc`)
+   - Passes the location pointer to `read_reloc`.
+
+6. `bad.c:778` `read_reloc`
+   - Receives the location pointer and calls `bfd_get_8` based on the howto size.
+
+7. `bad.c:784` (sink - call to `bfd_get_8`)
+   - Reads from the potentially out-of-bounds memory location, triggering the buffer over-read vulnerability.

@@ -1,0 +1,30 @@
+Now I have enough information to provide the analysis:
+
+## Root Cause
+
+The vulnerability is a NULL pointer dereference (CWE-476) in `mov_read_trak` at lines 898-899. The code incorrectly uses `sc->stts_count` as a guard condition when accessing `sc->tts_data`:
+
+```c
+for (int i = 1; sc->stts_count && i < sc->tts_count; i++) {
+    if (sc->tts_data[i].duration == sc->tts_data[0].duration)
+```
+
+The `stts_count` and `tts_data` are unrelated fields in `MOVStreamContext`:
+- `stts_count` - count of `stts_data` (MOVStts array), set by `mov_read_stts` at line 714
+- `tts_data` - a separate array (`MOVTimeToSample*`) that may remain uninitialized/NULL
+
+When `stts_count > 0` but `tts_data` is NULL or `tts_count == 0`, the code can dereference a NULL pointer when accessing `tts_data[i]`.
+
+## Trigger Path
+
+1. `bad.c:1047` `mov_read_default`
+   - Entry point that parses MOV/MP4 container atoms. Dispatches to child parsers based on atom type.
+
+2. `bad.c:611` `mov_read_trak`
+   - Called when parsing the 'trak' (track) atom. Allocates `MOVStreamContext` and calls `mov_read_default` recursively to parse track sub-atoms including 'stts'.
+
+3. `bad.c:630` `mov_read_stts` (the "source" location)
+   - Parses the 'stts' (time-to-sample) atom. Populates `sc->stts_data` and sets `sc->stts_count = i` at line 714. This is where `stts_count` gets a non-zero value.
+
+4. `bad.c:898-899` `mov_read_trak` (the "sink" location)
+   - After returning from `mov_read_default`, `mov_read_trak` accesses `sc->tts_data` at line 899 using `sc->stts_count` as the guard condition. If `stts_count` was set but `tts_data` was never populated (different array), this causes NULL pointer dereference.

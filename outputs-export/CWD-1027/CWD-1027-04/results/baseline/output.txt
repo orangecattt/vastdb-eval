@@ -1,0 +1,14 @@
+## Root Cause
+
+The vulnerability is a missing memory release in the `filter_frame` function. The object `out` is an `AVFrame*` allocated at line 813 by calling `ff_get_video_buffer()`. This function allocates an AVFrame structure containing buffer references (in the `buf[]` array). When `create_filtergraph()` fails at line 890-891 and returns an error, the function exits via `return res;` without freeing the previously allocated `out` frame, causing a memory leak. The known vulnerable location at line 813 is where the allocation occurs, but the actual CWE-401 trigger happens at line 890-891 where the allocated `out` is not released before returning on the error path.
+
+## Trigger Path
+
+1. `bad.c:805` `filter_frame`
+   - Entry point function that processes video frames through a filter; receives an input frame `in` and must allocate output frame `out`
+
+2. `bad.c:813` `ff_get_video_buffer(outlink, outlink->w, outlink->h)`
+   - Allocates an AVFrame structure with internal buffer references; the returned pointer is stored in `out` but not freed on error paths
+
+3. `bad.c:890-891` `create_filtergraph` failure path
+   - When `create_filtergraph` returns a negative error code, the function returns immediately without calling `av_frame_free(&out)`, causing the memory leak

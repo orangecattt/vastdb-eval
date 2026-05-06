@@ -1,0 +1,26 @@
+## Root Cause
+
+The vulnerability is a **NULL Pointer Dereference** in the `concat_filename` function. A local `struct fileinfo fe` variable is declared inside a loop in `read_formatted_entries()` (line 470). This struct's `name` member is only set when the DWARF content type is `DW_LNCT_path` (line 483). If the DWARF data does not contain this content type, `fe.name` remains uninitialized (a garbage pointer value). At line 548, `fe.name` is passed to the callback (`line_info_add_file_name`) without any validation, and it gets stored in the `files` array. Later, when `concat_filename` is called (line 373), it accesses `filename` in the `IS_ABSOLUTE_PATH(filename)` macro (line 375), which dereferences the uninitialized pointer, causing the null pointer dereference.
+
+## Trigger Path
+
+1. `bad.c:556` `decode_line_info`
+   - Calls `read_formatted_entries` to parse file table entries and stores results in `table->files`
+
+2. `bad.c:720` `read_formatted_entries` (via callback)
+   - Iterates through DWARF data entries, creating local `struct fileinfo fe` variable
+
+3. `bad.c:470` `read_formatted_entries`
+   - Declares `struct fileinfo fe` - `fe.name` is uninitialized unless `DW_LNCT_path` content type is present
+
+4. `bad.c:548` `read_formatted_entries`
+   - Calls `callback(table, fe.name, fe.dir, fe.time, fe.size)` without checking if `fe.name` was initialized
+
+5. `bad.c:418` `line_info_add_file_name`
+   - Stores `cur_file` (fe.name) into `table->files[table->num_files].name`
+
+6. `bad.c:373` `concat_filename`
+   - Retrieves `filename = table->files[file - 1].name` - could be garbage/uninitialized
+
+7. `bad.c:375` (vulnerable location)
+   - `if (!IS_ABSOLUTE_PATH(filename))` - dereferences potentially invalid pointer, causing CWE-476

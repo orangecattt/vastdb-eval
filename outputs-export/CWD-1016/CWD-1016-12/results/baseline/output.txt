@@ -1,0 +1,11 @@
+## Root Cause
+
+The vulnerability is a classic buffer overflow in the `append_command` function at line 351 where `STRCAT(IObuff, ": ");` is called without checking if `IObuff` has sufficient space to accommodate the appended string. The global buffer `IObuff` is defined with size `IOSIZE` (1025 bytes) at line 97. Before calling `append_command`, the buffer may already contain data from prior operations (e.g., error messages copied via `STRCPY(IObuff, _(e_not_an_editor_command))` at line 663). The function unconditionally concatenates ": " using `strcat` without validating available space, allowing an attacker-controlled input to fill the buffer and cause an out-of-bounds write when additional content is appended.
+
+## Trigger Path
+
+1. `/home/jialeiwang/mlir-dev/vastdb-eval/outputs/CWD-1016/CWD-1016-12/bad/bad.c:659-676` `do_one_cmd`
+   - When command is not recognized (`ea.cmdidx == CMD_SIZE`), error message is copied to IObuff via `STRCPY(IObuff, _(e_not_an_editor_command))` at line 663, and `append_command` is called at line 669 or 671 if `!sourcing`.
+
+2. `/home/jialeiwang/mlir-dev/vastdb-eval/outputs/CWD-1016/CWD-1016-12/bad/bad.c:346-367` `append_command`
+   - The function unconditionally executes `STRCAT(IObuff, ": ")` at line 351 without checking if `IObuff + STRLEN(IObuff) + 2` exceeds `IOSIZE`, causing out-of-bounds write when the buffer is already nearly full.

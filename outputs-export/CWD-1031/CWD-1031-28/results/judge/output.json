@@ -1,0 +1,12 @@
+{
+  "baseline": {
+    "correct": true,
+    "score": 10,
+    "reason": "Accurately identifies the CWE-476 null pointer dereference at line 563 where cJSON_GetObjectItem() return is dereferenced without NULL check. Correctly traces the data flow (entry → JSON parsing → vulnerable dereference) and the fix (using cJSON_GetStringValue()). No unsupported speculation."
+  },
+  "vastdb": {
+    "correct": true,
+    "score": 10,
+    "reason": "Accurately identifies the CWE-476 null pointer dereference at line 563 with the correct trigger condition (missing 'type' key in JSON). Notes the late check at line 564 and correctly describes the fix. No unsupported speculation."
+  }
+}

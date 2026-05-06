@@ -1,0 +1,31 @@
+## Root Cause
+
+The vulnerability is in the macro `PID_IS_INPUT(pid)` at line 1405, which dereferences `pid->pid`. When a NULL `GF_FilterPid*` is passed to `gf_filter_pid_set_property` (line 1459), it flows to `gf_filter_pid_set_property_full` (line 1407), where `PID_IS_INPUT(pid)` at line 1411 attempts to access `pid->pid` on a NULL pointer, causing a null pointer dereference (CWE-476).
+
+This occurs when `naludmx_set_dolby_vision` (line 1465) calls `gf_filter_pid_set_property(ctx->opid, ...)` at line 1503 without checking if `ctx->opid` is NULL. The output PID (`ctx->opid`) may be NULL when the filter's timescale is not set (line 1018-1021 conditionally creates it), but Dolby Vision NAL units can still be processed (lines 1640-1656) and trigger the vulnerable function call.
+
+## Trigger Path
+
+1. `bad.c:2428` `gf_filter_process_task`
+   - Top-level filter task handler; calls the filter's registered process function at line 2522.
+
+2. `bad.c:2522` `filter->freg->process(filter)` → `naludmx_process`
+   - Invokes the NALU demux filter's process function.
+
+3. `bad.c:1688` `naludmx_process`
+   - Processes HEVC video data; calls `naludmx_parse_nal_hevc` at line 1962 when parsing HEVC streams.
+
+4. `bad.c:1506` `naludmx_parse_nal_hevc`
+   - Parses HEVC NAL units; calls `naludmx_set_dolby_vision` at lines 1646/1655 when encountering Dolby Vision NAL units (RPU/EL).
+
+5. `bad.c:1465` `naludmx_set_dolby_vision`
+   - Sets Dolby Vision properties on output PID; calls `gf_filter_pid_set_property(ctx->opid, ...)` at line 1503 without NULL check on `ctx->opid`.
+
+6. `bad.c:1459` `gf_filter_pid_set_property`
+   - Exported function; forwards to `gf_filter_pid_set_property_full`.
+
+7. `bad.c:1407` `gf_filter_pid_set_property_full`
+   - Entry point of vulnerable function; calls `PID_IS_INPUT(pid)` at line 1411.
+
+8. `bad.c:1405` `PID_IS_INPUT` macro
+   - Dereferences `__pid->pid`; when `pid` is NULL, this causes null pointer dereference.

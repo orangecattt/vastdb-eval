@@ -1,0 +1,14 @@
+## Root Cause
+
+The vulnerability is an out-of-bounds write in `deflate16` at line 343: `dst[x] = FFMAX(FFMIN(sum / 8, AV_RN16A(&p1[2 * x])), limit);`. The function receives `p1` (source buffer) and `width` from the caller, but the coordinates array construction at lines 375-385 in `filter_slice` uses byte offsets based on `bpc` (bytes per component) and `stride`, while the inner loop in `deflate16` accesses `p1[2*x]` using a fixed stride of 2 bytes per pixel. When `bpc > 1` (e.g., 16-bit images), this mismatch causes the read pointer to exceed the bounds of the source buffer, leading to an out-of-bounds write to `dst[x]` based on garbage data from invalid memory.
+
+## Trigger Path
+
+1. `bad.c:399` `filter_frame`
+   - Takes input frame `in` from `inlink`, creates output frame `out`, sets `td.in = in` at line 414, then calls `ctx->internal->execute()` to invoke `filter_slice`.
+
+2. `bad.c:347` `filter_slice`
+   - Receives `ThreadData *td` containing `in` and `out` frames. Extracts plane dimensions from `s->planewidth[plane]` and constructs `coordinates` arrays at lines 375-385 using byte offsets. Calls `s->filter()` (which is `deflate16`) three times with different width parameters (1, width-2, 1) at lines 387-389.
+
+3. `bad.c:330` `deflate16`
+   - Receives `p1` (source buffer), `width`, and `coordinates` array. The loop at line 337 iterates `x` from 0 to `width`. At line 339, it reads `AV_RN16A(&p1[2 * x])` using a 2-byte stride regardless of actual bytes-per-component, and at line 343 writes to `dst[x]` using that same index, causing out-of-bounds access when `width` or the coordinate calculations exceed buffer bounds.

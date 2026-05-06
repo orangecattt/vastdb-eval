@@ -1,0 +1,11 @@
+## Root Cause
+
+The vulnerability is a memory leak in `streamGetEdgeID`. The function creates a `streamIterator` struct on the stack (line 421) which contains a `raxStack` (line 151). The `raxStack` can dynamically allocate heap memory when it grows beyond its static capacity (`static_items` array). When `streamIteratorStart` is called at line 423, it initializes the raxIterator's stack via `raxStart` (line 394) → `raxStackInit` (line 366). During subsequent iteration operations (via `streamIteratorGetID`), the stack may allocate heap memory. The function then returns at line 430 without calling `streamIteratorStop` or otherwise freeing this potentially allocated memory, causing a memory leak.
+
+## Trigger Path
+
+1. `bad.c:419` `streamGetEdgeID`
+   - Creates `streamIterator si` on stack (line 421)
+   - Calls `streamIteratorStart(&si,s,NULL,NULL,!first)` at line 423 (source), which internally calls `raxStart` → `raxStackInit` to initialize the raxStack
+   - Potentially triggers heap allocation in raxStack during `streamIteratorGetID` call at line 425
+   - Returns at line 430 (sink) without freeing any heap memory allocated in the raxStack

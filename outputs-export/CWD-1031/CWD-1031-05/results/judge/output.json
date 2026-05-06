@@ -1,0 +1,12 @@
+{
+  "baseline": {
+    "correct": false,
+    "score": 5,
+    "reason": "Correctly identifies the vulnerable line (270, missing NULL check on rmp->regprog->re_in_use) but the trigger path is wrong. Claims NULL from vim_regcomp() propagates directly through ExpandBufnames — but both callers (ExpandBufnames, buflist_findpat) check for NULL and return early. Misses the actual trigger: NFA-to-BT engine switch inside vim_regexec_string that sets regprog to NULL, affecting subsequent buffer iterations."
+  },
+  "vastdb": {
+    "correct": false,
+    "score": 5,
+    "reason": "Correctly identifies the vulnerable line (270, missing NULL check on rmp->regprog->re_in_use) but the trigger path is wrong. Claims NULL from vim_regcomp() propagates through ExpandBufnames — but callers check for NULL and return early. Also misses the NFA-to-BT engine-switch mechanism described in the actual patch ('rmp->regprog may become NULL when switching regexp engine'), instead presenting an oversimplified path that does not trigger in the bad code."
+  }
+}

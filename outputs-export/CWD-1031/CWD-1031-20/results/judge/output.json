@@ -1,0 +1,12 @@
+{
+  "baseline": {
+    "correct": true,
+    "score": 10,
+    "reason": "Accurately identifies the null pointer dereference in PID_IS_INPUT, the call chain through naludmx_set_dolby_vision at bad.c:1503, and explains why ctx->opid can be NULL (timescale-dependent creation at line 1018). Trigger path is detailed and complete with correct line numbers. No unsupported speculation."
+  },
+  "vastdb": {
+    "correct": true,
+    "score": 10,
+    "reason": "Accurately identifies the null pointer dereference in PID_IS_INPUT, the call chain from naludmx_set_dolby_vision (bad.c:1503), explains why ctx->opid can be NULL (timescale check at line 1018), and correctly identifies the fix (adding if (!ctx->opid) return). Trigger path is accurate with correct line numbers. No unsupported speculation."
+  }
+}

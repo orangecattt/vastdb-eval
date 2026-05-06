@@ -1,0 +1,25 @@
+Based on my analysis of the code, here's my finding:
+
+## Root Cause
+
+The vulnerability is a Use After Free where `ctx->stored_frame` is freed by `av_freep(&ctx->stored_frame)` at line 278 in `destroy_buffers`, but subsequently accessed at line 461 in `process_ftch` via `uint8_t *sf = ctx->stored_frame`. The issue occurs when `init_buffers` fails (e.g., due to memory allocation failure at line 297 in `init_buffers`), which calls `destroy_buffers` to clean up, but the control flow in `decode_frame` may still continue to process subsequent chunks including FTCH, leading to use of the freed pointer.
+
+## Trigger Path
+
+1. `bad.c:512` `decode_frame`
+   - Entry point that processes video frames from AVPacket, iterates through chunks in a while loop
+
+2. `bad.c:553` `decode_frame` → `process_frame_obj`
+   - Called to process FOBJ (frame object) chunks; can trigger buffer reallocation if frame dimensions change
+
+3. `bad.c:730` `process_frame_obj` → `init_buffers`
+   - When frame dimensions exceed current buffer sizes, `init_sizes` and `init_buffers` are called to reallocate buffers
+
+4. `bad.c:297` `init_buffers` → `destroy_buffers`
+   - If memory allocation fails (e.g., `!ctx->stored_frame && !ctx->version`), `destroy_buffers` is called which frees `ctx->stored_frame` at line 278
+
+5. `bad.c:589` `decode_frame` → `process_ftch`
+   - After processing FOBJ, the while loop continues and encounters the FTCH chunk; `process_ftch` is called to handle it
+
+6. `bad.c:461` `process_ftch`
+   - Accesses `ctx->stored_frame` via `uint8_t *sf = ctx->stored_frame;` - this is the use-after-free sink since the pointer was freed in step 4

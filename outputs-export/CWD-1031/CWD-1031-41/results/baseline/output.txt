@@ -1,0 +1,20 @@
+## Root Cause
+
+The vulnerability is a CWE-476 Null Pointer Dereference. In `bfd_section_hash_newfunc` (line 2938), when a new `section_hash_entry` is allocated, the code executes `memset(&((struct section_hash_entry *)entry)->section, 0, sizeof(asection))` which zeros out all fields of the embedded `asection` structure, including the `output_section` pointer field (which becomes NULL). Later, when `ignore_section_sym` is called during symbol mapping in `elf_map_symbols`, it attempts to access `sym->section->output_section->owner` at line 1390. If the symbol's section points to a zeroed section where `output_section` was set to NULL by the prior memset, dereferencing `output_section->owner` triggers a null pointer dereference.
+
+## Trigger Path
+
+1. `bad.c:1919` `_bfd_elf_write_object_contents`
+   - Called to write ELF object file contents; invokes `_bfd_elf_compute_section_file_positions` to prepare section data.
+
+2. `bad.c:1819` `_bfd_elf_compute_section_file_positions`
+   - Computes file positions for sections; calls `swap_out_syms` to prepare symbol table output.
+
+3. `bad.c:1503` `swap_out_syms`
+   - Prepares symbol table for output; calls `elf_map_symbols` to map and classify symbols.
+
+4. `bad.c:1395` `elf_map_symbols`
+   - Maps section symbols and classifies local/global symbols; calls `ignore_section_sym` for each symbol to determine if it should be ignored.
+
+5. `bad.c:1380` `ignore_section_sym`
+   - Checks if a section symbol should be ignored; at line 1390 dereferences `sym->section->output_section->owner` which triggers the null pointer dereference when `output_section` was zeroed by the source.

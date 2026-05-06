@@ -1,0 +1,20 @@
+## Root Cause
+
+The vulnerability occurs because `bfd_canonicalize_reloc` is called with `NULL` as the symbols parameter at line 985 in `load_specific_debug_section`. This NULL propagates through `coff_canonicalize_reloc` (line 799) to `coff_slurp_reloc_table` (line 707). Within `coff_slurp_reloc_table`, when the relocation's symbol index (`dst.r_symndx`) is valid (not -1 and within bounds), the code performs pointer arithmetic on the NULL symbols pointer at line 759 (`symbols + obj_convert(abfd)[dst.r_symndx]`) and then dereferences it at line 760 (`ptr = *(cache_ptr->sym_ptr_ptr)`), causing a null pointer dereference vulnerability.
+
+## Trigger Path
+
+1. `bad.c:1166` `dump_dwarf_section`
+   - Iterates over dwarf debug sections and calls `load_specific_debug_section` for each enabled section
+
+2. `bad.c:934` `load_specific_debug_section`
+   - Loads debug section contents and calls `bfd_canonicalize_reloc(abfd, sec, relocs, NULL)` at line 985 with NULL as the symbols parameter to process relocations
+
+3. `bad.c:827` `bfd_canonicalize_reloc`
+   - Wrapper function that dispatches to the target-specific implementation via BFD_SEND macro, calling `coff_canonicalize_reloc`
+
+4. `bad.c:799` `coff_canonicalize_reloc`
+   - For non-constructor sections, calls `coff_slurp_reloc_table(abfd, section, symbols)` at line 815, passing the NULL symbols value through
+
+5. `bad.c:707` `coff_slurp_reloc_table`
+   - When processing each relocation entry with a valid symbol index, performs pointer arithmetic on NULL symbols pointer at line 759 and dereferences it at line 760 (`ptr = *(cache_ptr->sym_ptr_ptr)`), triggering the null pointer dereference CWE-476

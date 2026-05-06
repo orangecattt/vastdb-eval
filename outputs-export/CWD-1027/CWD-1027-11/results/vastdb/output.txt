@@ -1,0 +1,24 @@
+Based on my analysis of the code and VAST DB queries, I can now provide the complete analysis:
+
+## Root Cause
+
+The vulnerability is a CWE-401 Missing Release of Memory after Effective Lifetime. In the `read_png` function at line 582, `png_create_read_struct` allocates memory for a PNG read structure and stores the pointer in `dp->read_pp`. This memory should be freed using `png_destroy_read_struct`, but no such deallocation function is ever called in the codebase. When the program exits via `return 99;` at either line 947 (unknown command-line option) or line 964 (test failure return value > QUIET), the allocated png_struct memory is never freed, causing a memory leak.
+
+## Trigger Path
+
+1. `bad.c:868` `main`
+   - Entry point that processes command-line arguments and calls `do_test`. When an unknown option is passed (line 946-947), it returns 99 directly without cleanup.
+
+2. `bad.c:850` `do_test`
+   - Sets up error handling using `setjmp`/`longjmp`, then calls `test_one_file`. If a test returns a value > QUIET (checked at line 963-964), it returns 99 without cleanup.
+
+3. `bad.c:698` `test_one_file`
+   - Calls `update_display` to read and validate the PNG file. On certain error conditions (line 717-718, 729-730), it returns early without freeing memory.
+
+4. `bad.c:623` `update_display`
+   - Calls `read_png` to perform the initial PNG read with no transforms, then moves the read pointers to `original_pp`/`original_ip` fields.
+
+5. `bad.c:565` `read_png`
+   - Allocates memory at line 582 via `png_create_read_struct(PNG_LIBPNG_VER_STRING, dp, display_error, display_warning)` and stores it in `dp->read_pp`. This allocation occurs before any error condition that could trigger `return 99;`.
+
+The VAST DB query confirmed the function locations and call structure, with `png_create_read_struct` at line 556 and the return 99 constants at lines 947 and 964 in `main`.

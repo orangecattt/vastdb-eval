@@ -1,0 +1,20 @@
+## Root Cause
+
+The vulnerability occurs because `output_section->contents` at line 1077 can be NULL when the `SEC_GROUP` flag is set (line 1069 condition), yet this NULL pointer is directly assigned to `new_contents` without any validation. The NULL value then propagates through the call chain: `bfd_set_section_contents` passes it as the data pointer to `_bfd_generic_set_section_contents`, which forwards it to `bfd_write`, which eventually passes it to `cache_bwrite`. At the sink (line 900), `fwrite` dereferences this NULL pointer, causing the NULL pointer dereference (CWE-476).
+
+## Trigger Path
+
+1. `bad.c:988` `default_indirect_link_order`
+   - Receives `output_section` as parameter; at line 1077 assigns `output_section->contents` to `new_contents` without NULL check when handling group sections.
+
+2. `bad.c:954` `bfd_set_section_contents`
+   - Receives `new_contents` (NULL) as `location` parameter at line 1092, passes it to `_bfd_generic_set_section_contents`.
+
+3. `bad.c:941` `_bfd_generic_set_section_contents`
+   - Forwards the NULL pointer to `bfd_write` at line 948.
+
+4. `bad.c:911` `bfd_write`
+   - Passes the NULL pointer to `cache_bwrite` at line 929.
+
+5. `bad.c:888` `cache_bwrite`
+   - Receives the NULL pointer as `from` parameter; line 900 calls `fwrite(from, 1, nbytes, f)` which dereferences the NULL pointer, triggering the vulnerability.

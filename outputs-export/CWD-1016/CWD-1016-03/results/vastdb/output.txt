@@ -1,0 +1,21 @@
+Based on my VAST DB and source code analysis, here's what I found:
+
+## Root Cause
+
+The vulnerability is an **off-by-one error in loop bounds** at line 807 in `bad.c`. The inner for loop condition `i < block_pos_right + block_step` allows the loop variable `i` to reach values exceeding the valid array bounds (`block_pos_right = width - block_size`). When `i` is passed to `block_matching` at line 812, it can cause an out-of-bounds write (CWE-787) when the function uses it to index into arrays. The `block_matching` function at line 505 is declared but never implemented in this test case - it's a forward declaration without a body, which is itself unusual and may indicate the sink code was meant to be there but is missing or obfuscated.
+
+## Trigger Path
+
+1. `bad.c:822` `filter_frame`
+   - Entry point that sets up frame processing and calls filter_slice for each plane
+
+2. `bad.c:779` `filter_slice` 
+   - Contains the vulnerable loops. Variables `block_pos_right = width - block_size` and `block_step` are computed at lines 790-793
+
+3. `bad.c:807` for loop (inner)
+   - The vulnerability: `for (i = 0; i < block_pos_right + block_step; i += block_step)` - the `+ block_step` in the bound creates an off-by-one that allows i to exceed valid indices
+
+4. `bad.c:812` `block_matching(s, ref, ref_linesize, j, i, plane, jobnr)`
+   - Source anchor. The loop variable `i` (and similarly `j`) can have values that exceed array bounds when passed to this function
+
+Note: The explicit sink `dst[j] = src[j]` was not found in the code. The `block_matching` function (line 505) is only a forward declaration without implementation, suggesting the sink code may be intentionally omitted or the test case relies on undefined behavior from calling an unimplemented function.

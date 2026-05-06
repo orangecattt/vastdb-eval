@@ -1,0 +1,20 @@
+## Root Cause
+
+The vulnerability occurs because `vim_regcomp()` can return NULL when regex compilation fails (lines 639-670), but the code does not validate this before using the `regprog` pointer. At line 270 in `vim_regexec_string`, the code directly accesses `rmp->regprog->re_in_use` without checking if `rmp->regprog` is NULL. If `vim_regcomp()` fails and returns NULL, any code path that subsequently calls `vim_regexec()` with this NULL `regprog` will trigger a NULL pointer dereference.
+
+## Trigger Path
+
+1. `bad.c:380` `ExpandBufnames`
+   - Calls `vim_regcomp()` at line 435 to compile a pattern and assign to `regmatch.regprog`. If compilation fails, `regprog` can be NULL.
+
+2. `bad.c:462` `buflist_match`
+   - Called with the `regmatch` struct that may have a NULL `regprog`.
+
+3. `bad.c:333` `fname_match`
+   - Calls `vim_regexec()` at line 346 with the potentially NULL `regprog`.
+
+4. `bad.c:327` `vim_regexec`
+   - Calls `vim_regexec_string()` at line 329 passing the `regmatch` with NULL `regprog`.
+
+5. `bad.c:258` `vim_regexec_string`
+   - At line 270, dereferences `rmp->regprog->re_in_use` without checking if `rmp->regprog` is NULL, causing the CWE-476 NULL Pointer Dereference.

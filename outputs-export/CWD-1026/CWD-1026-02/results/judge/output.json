@@ -1,0 +1,12 @@
+{
+  "baseline": {
+    "correct": false,
+    "score": 3,
+    "reason": "Correctly identifies source (av_freep line 278) and sink (line 461), but the trigger path is fundamentally wrong — claims decode_frame's while-loop continues to FTCH after init_buffers failure. In actual code, process_frame_obj returns error and decode_frame returns immediately (bad.c:553–554), so FTCH is never reached in the same frame. The NVD real root cause involves a different path where process_frame_obj returns 0 (not error) for invalid-size FOBJ, leaving have_dimensions=0 while STOR still saves data."
+  },
+  "vastdb": {
+    "correct": true,
+    "score": 7,
+    "reason": "Correctly identifies source (av_freep line 278), sink (line 461), and the cross-frame UAF trigger. Accurately says 'in a subsequent decoder call' rather than claiming same-frame continuation. The root cause description (init_buffers failure → destroy_buffers frees stored_frame → subsequent FTCH accesses freed pointer) matches the code's actual data flow. Loses points for not reaching the more precise NVD mechanism (FOBJ returning 0 with have_dimensions unset, then STOR/FTCH triggering re-init)."
+  }
+}

@@ -1,0 +1,17 @@
+## Root Cause
+
+The vulnerability is a **Use After Free** in the `ImagesToBlob` function. When `DetachBlob(images->blob)` at line 755 returns a valid pointer (stored in `blob`), and `status == MagickFalse`, the code calls `RelinquishMagickMemory(blob)` at line 759 to free the blob memory. However, immediately after at line 761, the code attempts to use the now-freed `blob` pointer in `ResizeQuantumMemory(blob,*length+1,sizeof(unsigned char))`. The freed pointer is used after being returned to the memory allocator, creating the Use After Free condition.
+
+## Trigger Path
+
+1. `bad.cpp:692` `ImagesToBlob`
+   - Entry function; `blob` variable declared at line 705; control reaches line 755 based on `GetMagickBlobSupport(magick_info)` being true.
+
+2. `bad.cpp:755` `blob=DetachBlob(images->blob);`
+   - Calls `DetachBlob` which returns a valid pointer to blob data and sets `images->blob->data` to NULL (unmapping happens at line 629 in DetachBlob).
+
+3. `bad.cpp:759` `blob=RelinquishMagickMemory(blob);`
+   - This is the **sink** - the memory pointed to by `blob` is freed. This executes when `blob != NULL` AND `status == MagickFalse`.
+
+4. `bad.cpp:761` `blob=ResizeQuantumMemory(blob,*length+1,sizeof(unsigned char));`
+   - This is the **source** - uses the freed `blob` pointer after it was freed at line 759.

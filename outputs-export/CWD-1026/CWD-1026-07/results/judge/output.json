@@ -1,0 +1,12 @@
+{
+  "baseline": {
+    "correct": true,
+    "score": 7,
+    "reason": "Correctly identifies UAF (CWE-416), source at gf_odf_del_iod (line 588), sink at l->od->objectDescriptorID (line 1644), and the load_xmt_run→xmt_resolve_od_links trigger path. Notes gf_free(iod) not in test case. Misses the precise freeing context: descriptors are freed in xmt_node_end when 'outside scene scope' while od_links retains dangling l->od references."
+  },
+  "vastdb": {
+    "correct": true,
+    "score": 7,
+    "reason": "Correctly identifies UAF (CWE-416), source at gf_odf_del_iod (line 588), sink at l->od->objectDescriptorID (line 1644), and the load_xmt_run→xmt_resolve_od_links trigger path. Same omissions as baseline: does not identify that the free occurs in xmt_node_end when descriptors are 'outside scene scope', leaving dangling od_links entries."
+  }
+}

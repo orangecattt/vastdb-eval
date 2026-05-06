@@ -1,0 +1,12 @@
+{
+  "baseline": {
+    "correct": true,
+    "score": 7,
+    "reason": "Correctly identifies the core issue: `out` frame allocated at line 813 leaks on the `create_filtergraph` error path (lines 890-891). However, it misses other error paths (e.g., `av_frame_copy_props` failure at line 826, rgb_sz allocation failure at line 885, yuv2yuv_passthrough copy failure at line 906) where both `in` and `out` are also leaked in the bad version. Accurate for the primary trigger path but incomplete."
+  },
+  "vastdb": {
+    "correct": true,
+    "score": 7,
+    "reason": "Correctly identifies the same core `out` frame leak on the `create_filtergraph` error path with a clear step-by-step trigger path. Same limitations as baseline: misses the other error paths (av_frame_copy_props, rgb_sz alloc failure, yuv2yuv_passthrough copy) where `in` and `out` are both leaked. No unsupported speculation; analysis is accurate but incomplete."
+  }
+}

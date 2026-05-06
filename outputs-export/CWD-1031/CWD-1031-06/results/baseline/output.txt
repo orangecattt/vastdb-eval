@@ -1,0 +1,14 @@
+## Root Cause
+
+The vulnerability occurs because `av_malloc()` at line 682 can fail and return NULL, but its return value is not checked. When the allocation fails, `s->edge_emu_buffer` remains NULL. Later, at line 527 (and line 513), the code dereferences `s->edge_emu_buffer` via `uint8_t *temp = s->edge_emu_buffer;` without any NULL check, causing a NULL pointer dereference (CWE-476).
+
+## Trigger Path
+
+1. `bad.c:591` `vp3_decode_frame`
+   - Entry point that processes VP3 video frames; calls `render_slice` at line 800 after allocating `edge_emu_buffer`
+
+2. `bad.c:800` `render_slice` (called from vp3_decode_frame)
+   - Processes video slices and uses `s->edge_emu_buffer` at line 527 for motion compensation when source pixels are out of bounds
+
+3. `bad.c:527` `uint8_t *temp = s->edge_emu_buffer;`
+   - Dereferences the NULL pointer when `av_malloc` failed at line 682, triggering the NULL pointer dereference CWE-476

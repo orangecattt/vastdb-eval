@@ -1,0 +1,17 @@
+Based on the code analysis:
+
+## Root Cause
+
+The vulnerability is a memory leak in `nut_write_trailer` at line 342-349. A dynamic buffer `dyn_bc` is allocated via `avio_open_dyn_buf(&dyn_bc)`, which internally allocates memory through `av_mallocz` and `avio_alloc_context`. When `ret >= 0` but `nut->sp_count` is 0 (false), the code skips the `write_index` and `put_packet` calls that would normally free the buffer via `avio_close_dyn_buf`. The function then returns 0 at line 349 without releasing `dyn_bc`, causing a memory leak (CWE-401).
+
+## Trigger Path
+
+1. `bad.c:333` `nut_write_trailer(AVFormatContext *s)`
+   - Entry point; receives format context containing NUT context
+   - Calls `avio_open_dyn_buf(&dyn_bc)` at line 342 (source of allocation)
+
+2. External caller (not present in this file)
+   - Would invoke `nut_write_trailer` during NUT format writing
+   - The external caller is not visible in this code excerpt
+
+The vulnerable path: when `nut->sp_count` evaluates to false, control flows from line 343's condition check directly to the `return 0;` at line 349 (sink), bypassing the cleanup that occurs in the `put_packet` path.

@@ -1,0 +1,26 @@
+Now I understand the code. Let me analyze the vulnerability path.
+
+## Root Cause
+
+The vulnerability is a double-free in the `dialog_changed` function. When a buffer has no filename (`empty_bufname = TRUE`), `buf_set_name()` is called which internally invokes `fname_expand()`. This function sets `buf->b_sfname = buf->b_ffname` (line 514) when `b_sfname` is NULL, creating an alias. Then `buf->b_fname = buf->b_sfname` (line 492), so all three pointers reference the same allocated memory. When the write fails and cleanup occurs (lines 661-663), `VIM_CLEAR(buf->b_fname)` frees the memory and sets the pointer to NULL. However, because `buf->b_sfname` was aliased to point to the same address as `buf->b_ffname` (not `b_fname`), it still points to the freed memory. Thus the subsequent `VIM_CLEAR(buf->b_sfname)` attempts to free already-freed memory, causing a double-free.
+
+## Trigger Path
+
+1. `bad.c:620` `dialog_changed`
+   - Called with a buffer that has no filename (`buf->b_fname == NULL`)
+   - Sets `empty_bufname = TRUE` at line 647
+
+2. `bad.c:476` `buf_set_name`
+   - Called at line 649 when `empty_bufname` is TRUE
+   - Frees old `b_sfname` and `b_ffname` at lines 485-486
+   - Allocates new strings and calls `fname_expand` at line 491
+
+3. `bad.c:506` `fname_expand`
+   - At lines 513-514: if `*sfname` (b_sfname) is NULL, sets it to `*ffname` (b_ffname)
+   - This creates an alias: b_sfname now points to the same memory as b_ffname
+   - Returns to buf_set_name where `buf->b_fname = buf->b_sfname` (line 492)
+
+4. `bad.c:661-663` (in `dialog_changed` cleanup section)
+   - After write fails, `VIM_CLEAR(buf->b_fname)` frees the memory at line 661
+   - `VIM_CLEAR(buf->b_sfname)` attempts to free already-freed memory at line 663
+   - **Double free vulnerability triggered**

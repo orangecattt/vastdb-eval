@@ -1,0 +1,17 @@
+## Root Cause
+
+The vulnerability is a NULL pointer dereference (CWE-476) in `ctx->raw_mantissa`. In `decode_init` (line 774), `ctx->raw_mantissa[c]` is allocated using `av_calloc(ctx->cur_frame_length, sizeof(**ctx->raw_mantissa))`. However, `ctx->cur_frame_length` is set to 0/uninitialized at init time (it's only assigned in `decode_frame` at lines 1014-1017). When `av_calloc(0, ...)` is called, it returns NULL. Although there's a NULL check for the outer `raw_mantissa` array (line 763), there is no check after the per-channel allocations at line 774. When `read_diff_float_data` is later called (for floating-point formats), it dereferences `raw_mantissa[c][i]` at line 921 without verifying the pointer is valid, causing the NULL pointer dereference.
+
+## Trigger Path
+
+1. `bad.c:629` `decode_init`
+   - Allocates `ctx->raw_mantissa[c]` with size 0 (ctx->cur_frame_length is uninitialized/0), potentially getting NULL
+
+2. `bad.c:992` `decode_frame`
+   - Entry point that sets `ctx->cur_frame_length` and calls `read_frame_data`
+
+3. `bad.c:473` `read_frame_data`
+   - Calls `read_diff_float_data` when `sconf->floating` is true (line 618)
+
+4. `bad.c:812` `read_diff_float_data`
+   - Dereferences `raw_mantissa[c][i]` at line 921 without NULL check, triggering the vulnerability

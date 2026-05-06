@@ -1,0 +1,12 @@
+{
+  "baseline": {
+    "correct": true,
+    "score": 10,
+    "reason": "Accurately identifies the uninitialized r_symbol due to update_all_relocations allocating without zeroing, and dump_relocations returning early on slurp_rela_relocs failure. Trigger path correctly traces from process_object through process_relocs to process_got_section_contents free(). No unsupported speculation."
+  },
+  "vastdb": {
+    "correct": true,
+    "score": 10,
+    "reason": "Correctly identifies the same root cause and trigger path. Notes that rels output parameter is unset on slurp failure. Equivalent in accuracy to baseline. No unsupported speculation."
+  }
+}

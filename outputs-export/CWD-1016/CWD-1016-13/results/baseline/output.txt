@@ -1,0 +1,24 @@
+Based on my analysis of the code:
+
+## Root Cause
+
+The vulnerability is in `OPENSSL_uni2utf8` (bad.c:135). The variable `asclen` becomes unsafe because it is calculated in the first loop (lines 144-158) by summing return values from `bmp_to_utf8()`. When `bmp_to_utf8()` is called with a `len` parameter indicating sufficient bytes (e.g., 4) but the actual input buffer is smaller, it performs an out-of-bounds read at line 125 (`lo = (utf16[2] << 8) | utf16[3];`) accessing `utf16[2]` and `utf16[3]` beyond the buffer. This undefined behavior can cause `bmp_to_utf8()` to return an incorrect positive value instead of -1 for error. The first loop then uses this incorrect `j` value to increment both `i` (line 154 or 156) and `asclen` (line 157), causing `asclen` to be vastly over-allocated. When the second loop writes UTF-8 data to `asctmp + asclen` (line 169), it writes beyond the allocated buffer, triggering CWE-787 (out-of-bounds write).
+
+## Trigger Path
+
+1. `bad.c:135` `OPENSSL_uni2utf8`
+   - Entry function that converts UTF-16 to UTF-8. Receives external input `uni` and `unilen`.
+
+2. `bad.c:144` first loop in `OPENSSL_uni2utf8`
+   - Iterates through input to calculate required buffer size. Calls `bmp_to_utf8` with remaining length.
+
+3. `bad.c:145` `bmp_to_utf8(NULL, uni + i, unilen - i)`
+   - Called with `str=NULL` to calculate output size. The `unilen - i` parameter may claim 4+ bytes remain when only 2 actually exist.
+
+4. `bad.c:125` `bmp_to_utf8` reads surrogate pair bytes
+   - Reads `utf16[2]` and `utf16[3]` without proper bounds checking against the actual buffer, causing out-of-bounds read (undefined behavior).
+
+5. `bad.c:157` `asclen += j;`
+   - The vulnerable location. Due to undefined behavior from the out-of-bounds read, `j` contains an incorrect value that causes `asclen` to be over-calculated, leading to out-of-bounds write in the second loop.
+
+Note: The actual external entry point (e.g., `main()` or other caller) is not present in this file - it would be in external code that invokes `OPENSSL_uni2utf8`.

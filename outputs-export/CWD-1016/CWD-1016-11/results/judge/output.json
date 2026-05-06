@@ -1,0 +1,12 @@
+{
+  "baseline": {
+    "correct": false,
+    "score": 2,
+    "reason": "Blames the `==` vs `>=` nesting check, but this check is identical in bad/good. The actual fix is the missing `sublen <= 0` guard in `do_string_sub`. Claims `nested` exceeds array bounds, which doesn't occur since nesting==4 is caught. Correct on CWE, function, and crash site."
+  },
+  "vastdb": {
+    "correct": false,
+    "score": 2,
+    "reason": "Same incorrect root cause as baseline: focuses on `==` vs `>=` nesting check. The actual fix is the `sublen <= 0` guard in `do_string_sub`. Claims `nested` exceeds `MAX_REGSUB_NESTING`, which does not happen. Correct on CWE, function, and crash site."
+  }
+}

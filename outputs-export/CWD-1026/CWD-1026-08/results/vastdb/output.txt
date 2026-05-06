@@ -1,0 +1,22 @@
+Now I have confirmed the vulnerability through both code analysis and VAST DB evidence. Let me provide the final explanation:
+
+## Root Cause
+
+The vulnerability is a classic Use-After-Free (CWE-416). In `sip_uac_subscribe_onreply`, after calling `sip_subscribe_remove(t->agent, subscribe)` at line 448, the `subscribe` object is freed internally by `sip_subscribe_release` (called from `sip_subscribe_remove`). When `sip_subscribe_release` is invoked, it decrements the reference count at line 384 via `atomic_decrement32(&subscribe->ref)`. Since the ref becomes 0, it proceeds to free the memory at line 389 with `free(subscribe)`. However, immediately after returning from `sip_subscribe_remove`, the code at line 449 attempts to access `subscribe->ref` in `assert(1 == subscribe->ref)`, which now reads from freed heap memory.
+
+## Trigger Path
+
+1. `bad.c:417` `sip_uac_subscribe_onreply`
+   - Entry point handling SIP SUBSCRIBE reply messages. When expires=0, triggers removal path.
+
+2. `bad.c:448` `sip_subscribe_remove`
+   - Called with the subscribe object when Expires header is 0. Internally calls `sip_subscribe_release` at line 413.
+
+3. `bad.c:413` `sip_subscribe_release` (inside `sip_subscribe_remove`)
+   - Decrements ref count; since ref reaches 0, frees the subscribe object at line 389.
+
+4. `bad.c:389` `free(subscribe)` 
+   - The memory pointed to by `subscribe` is freed, returning it to the heap.
+
+5. `bad.c:449` `assert(1 == subscribe->ref)`
+   - After `sip_subscribe_remove` returns, control flows back to `sip_uac_subscribe_onreply` which dereferences `subscribe->ref` on the already-freed memory - **the Use-After-Free trigger**.

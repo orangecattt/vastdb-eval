@@ -1,0 +1,25 @@
+Now I have sufficient evidence from both code analysis and VAST DB queries. Let me provide the final analysis.
+
+## Root Cause
+
+The vulnerability is a NULL Pointer Dereference (CWE-476). The `ciph` pointer in `ossl_quic_get_cipher_by_char` becomes NULL when `ssl3_get_cipher_by_char` fails to find a matching cipher suite in the `tls13_ciphers`, `ssl3_ciphers`, or `ssl3_scsvs` arrays. This occurs because `OBJ_bsearch_ssl_cipher_id` calls `ossl_bsearch`, which at line 254-255 returns NULL when the key is not found and `OSSL_BSEARCH_VALUE_ON_NOMATCH` flag is not set. The code at line 321 then dereferences `ciph->algorithm2` without checking if `ciph` is NULL, triggering the vulnerability.
+
+## Trigger Path
+
+1. `bad.c:318` `ossl_quic_get_cipher_by_char`
+   - Entry point; receives cipher character pointer `p`; calls `ssl3_get_cipher_by_char` at line 319 and stores result in `ciph`
+
+2. `bad.c:312` `ssl3_get_cipher_by_char`
+   - Extracts cipher ID from input bytes and calls `ssl3_get_cipher_by_id` at line 313
+
+3. `bad.c:297` `ssl3_get_cipher_by_id`
+   - Searches cipher arrays via `OBJ_bsearch_ssl_cipher_id` at lines 302, 305, 308; returns NULL if not found in any array
+
+4. `bad.c:294` `OBJ_bsearch_ssl_cipher_id` (macro expansion)
+   - Expands to `OBJ_bsearch_` which calls `OBJ_bsearch_ex_` which calls `ossl_bsearch`
+
+5. `bad.c:233` `ossl_bsearch`
+   - Binary search implementation; **source of NULL**: when `c != 0 && !(flags & OSSL_BSEARCH_VALUE_ON_NOMATCH)` at line 254, sets `p = NULL` at line 255
+
+6. `bad.c:321` `ciph->algorithm2` (sink)
+   - Dereferences `ciph` without NULL check: `if ((ciph->algorithm2 & SSL_QUIC) == 0)` — triggers NULL pointer dereference when `ciph` is NULL

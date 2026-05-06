@@ -1,0 +1,14 @@
+## Root Cause
+
+The vulnerability is a **double free** (CWE-415) involving the `task` object. In `extract_lltask_from_task` (source at line 231), when `ff_queue_push_back` fails, `av_freep(&lltask)` frees the lltask structure. However, before this failure, at line 228, the code executes `lltask->task = task`, storing a pointer to `task` inside `lltask`. When lltask is freed, this creates an inconsistent state where the caller (`dnn_execute_model_tf`) still owns `task` but the function signals failure. The sink at line 271 incorrectly calls `av_freep(&task)` when `extract_lltask_from_task` returns an error, creating a double-free scenario where `task` may be freed both implicitly (through the lltask structure's failed push) and explicitly at line 271. The memory management becomes ambiguous because the caller cannot determine whether `task` was already handled when `extract_lltask_from_task` fails.
+
+## Trigger Path
+
+1. `bad.c:237` `dnn_execute_model_tf`
+   - Top-level function that orchestrates DNN task execution. Allocates `task` at line 250, then calls `extract_lltask_from_task` at line 269.
+
+2. `bad.c:217` `extract_lltask_from_task`
+   - Called with `task` pointer. Allocates `lltask` at line 221, stores task pointer inside it at line 228 (`lltask->task = task`). When `ff_queue_push_back(lltask_queue, lltask)` fails at line 229, calls `av_freep(&lltask)` at line 231 (source anchor), returns error without freeing `task`.
+
+3. `bad.c:271` `av_freep(&task)` (sink)
+   - Triggered when `extract_lltask_from_task` returns non-zero. This incorrectly frees `task`, which may create double-free when combined with the lltask free at line 231, as the object relationships become ambiguous after the failed queue operation.

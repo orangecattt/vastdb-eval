@@ -1,0 +1,13 @@
+Now I have all the information I need to analyze the vulnerability. Based on my code analysis:
+
+## Root Cause
+
+The vulnerability is a CWE-401 (Missing Release of Memory after Effective Lifetime) in the `param_parse` function. At line 407, memory is allocated via `av_iamf_param_definition_alloc()` and assigned to `param`. At line 449, when the condition `!mode && !constant_subblock_duration && total_duration != duration` is true, the function returns `AVERROR_INVALIDDATA` **without freeing the allocated `param`**. Other error paths in the same function (lines 442-443, 461-462, 468-469, 475-476) correctly call `av_free(param)` before returning, but this path at line 449 forgets to do so.
+
+## Trigger Path
+
+1. `bad.c:371` `param_parse` (static function)
+   - Receives parsed IAMF parameter data from a caller; allocates `param` at line 407 and validates subblock durations at line 447
+   - The leak occurs when validation fails at line 449: `return AVERROR_INVALIDDATA` without freeing `param`
+
+**Note**: The `param_parse` function is declared `static` and has no visible callers within this test file. In the actual FFmpeg IAMF demuxer, it would be called from a higher-level parsing function (likely in an IAMF muxing/demuxing entry point), but this test case focuses on the vulnerable function itself.

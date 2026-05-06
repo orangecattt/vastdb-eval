@@ -1,0 +1,12 @@
+{
+  "baseline": {
+    "correct": false,
+    "score": 6,
+    "reason": "Correctly traces the NULL dereference call chain from var->name assignment through to bfd_hash_hash, but misidentifies root cause: attributes the NULL to read_string functions returning NULL rather than the actual missing is_str_attr(attr.form) guard that filters non-string forms for DW_AT_name on variables."
+  },
+  "vastdb": {
+    "correct": false,
+    "score": 6,
+    "reason": "Same fundamental issue as baseline: correctly identifies the vulnerability type, crash location, and data-flow path, but misattributes why attr.u.str can be NULL — blames invalid/missing string data rather than the actual root cause (missing is_str_attr form check before union field access)."
+  }
+}

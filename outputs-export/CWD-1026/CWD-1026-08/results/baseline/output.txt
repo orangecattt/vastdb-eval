@@ -1,0 +1,16 @@
+## Root Cause
+
+The vulnerability occurs because `sip_subscribe_remove` (called at line 448) internally calls `sip_subscribe_release` which frees the `subscribe` object at line 389. However, immediately after returning from `sip_subscribe_remove`, the code at line 449 attempts to access `subscribe->ref` in an assertion, causing a use-after-free. The `subscribe` pointer becomes dangling after the memory is freed, but the code still tries to dereference it.
+
+## Trigger Path
+
+1. `bad.c:417` `sip_uac_subscribe_onreply`
+   - Entry function that processes SIP SUBSCRIBE replies; calls `sip_subscribe_remove` when Expires header is 0, then accesses the freed `subscribe` pointer
+
+2. `bad.c:394` `sip_subscribe_remove`
+   - Removes the subscribe from the agent's list and calls `sip_subscribe_release` at line 413, which frees the `subscribe` object
+
+3. `bad.c:378` `sip_subscribe_release`
+   - Decrements the reference count and calls `free(subscribe)` at line 389, freeing the memory
+
+The use-after-free is triggered at `bad.c:449` when `assert(1 == subscribe->ref)` executes after `sip_subscribe_remove` has already freed the memory.

@@ -1,0 +1,12 @@
+{
+  "baseline": {
+    "correct": true,
+    "score": 10,
+    "reason": "Accurately identifies the UAF: sip_subscribe_remove (line 448) calls sip_subscribe_release which frees subscribe at line 389, then line 449 accesses subscribe->ref after free. Trigger path is correct and complete with accurate line numbers. No unsupported speculation."
+  },
+  "vastdb": {
+    "correct": true,
+    "score": 10,
+    "reason": "Accurately identifies the UAF root cause with the same trigger path as baseline. Correctly traces ref-count decrement (line 384), free (line 389), and post-free access (line 449). No unsupported speculation."
+  }
+}

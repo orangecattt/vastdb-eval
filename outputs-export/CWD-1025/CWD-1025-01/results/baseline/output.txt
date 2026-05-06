@@ -1,0 +1,26 @@
+## Root Cause
+
+The vulnerability is a double-free in `ICUService::getKey`. When `serviceCache->put()` is called to cache a `CacheEntry*` result, if `_uhash_put` encounters an error (e.g., memory allocation failure when the hash table is full), it invokes `HASH_DELETE_KEY_VALUE` which calls the valueDeleter (`cacheDeleter`) on the value. The `cacheDeleter` calls `CacheEntry::unref()` which may delete the CacheEntry. However, control then returns to `ICUService::getKey` where `U_FAILURE(status)` is true, and the code at lines 831-832 explicitly calls `delete result;`, causing a double-free of the same CacheEntry object.
+
+## Trigger Path
+
+1. `bad.cpp:729` `ICUService::getKey(ICUServiceKey& key, UnicodeString* actualReturn, const ICUServiceFactory* factory, UErrorCode& status) const`
+   - Entry point; creates CacheEntry* result and attempts to cache it via serviceCache->put
+
+2. `bad.cpp:830` `serviceCache->put(result->actualDescriptor, result, status)`
+   - Calls Hashtable::put to store the CacheEntry in the service cache hashtable
+
+3. `bad.cpp:292` `Hashtable::put(const UnicodeString& key, void* value, UErrorCode& status)`
+   - Allocates a new UnicodeString for the key and calls uhash_put
+
+4. `bad.cpp:642` `uhash_put(UHashtable *hash, void* key, void* value, UErrorCode *status)`
+   - Wraps parameters and calls internal _uhash_put
+
+5. `bad.cpp:656` `_uhash_put(UHashtable *hash, UHashTok key, UHashTok value, int8_t hint, UErrorCode *status)`
+   - When hash table is full and rehash fails (line 683-687) or when table reaches capacity exactly (lines 703-708), sets U_MEMORY_ALLOCATION_ERROR and jumps to err: label
+
+6. `bad.cpp:722` `HASH_DELETE_KEY_VALUE(hash, key.pointer, value.pointer)` (in `_uhash_put` err: label)
+   - **Source**: Calls `(*hash->valueDeleter)(valuepointer)` which invokes cacheDeleter on the CacheEntry, potentially deleting it
+
+7. `bad.cpp:831-832` (back in `ICUService::getKey` after put returns)
+   - **Sink**: Checks `if (U_FAILURE(status))` and calls `delete result;` on the already-deleted CacheEntry

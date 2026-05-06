@@ -1,0 +1,14 @@
+## Root Cause
+
+The vulnerability is a **NULL pointer dereference** in the `load` function at line 569. The function `r_io_desc_get` (source at line 518) returns `NULL` when the file descriptor `bf->fd` is not found in the `RIDStorage` (e.g., invalid or closed fd). However, the code at line 569 directly dereferences the returned pointer to access `->plugin->meta.name` without any NULL check. When an invalid `bf->fd` is passed, `desc_get` returns NULL, and accessing `->plugin` on a NULL pointer triggers the CWE-476 vulnerability.
+
+## Trigger Path
+
+1. `bad.c:565` `load`
+   - Entry point that receives `RBinFile *bf` with `bf->fd` from external caller. Calls `bf->rbin->iob.desc_get(bf->rbin->iob.io, bf->fd)` without validating if `bf->fd` is a valid open file descriptor.
+
+2. `bad.c:516` `r_io_desc_get`
+   - Calls `r_id_storage_get(&io->files, fd)` to retrieve the `RIODesc` by file descriptor. Returns NULL if the fd is not present in the id storage (e.g., never opened or already closed).
+
+3. `bad.c:508` `r_id_storage_get`
+   - Returns `NULL` when `id >= storage->size` (line 513), which occurs when an invalid fd is passed. This NULL is returned to the caller in `load` without any validation.

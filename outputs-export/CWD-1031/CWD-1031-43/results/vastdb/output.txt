@@ -1,0 +1,23 @@
+## Root Cause
+
+The vulnerability is a NULL pointer dereference in the `default_indirect_link_order` function. When the condition `(output_section->flags & (SEC_GROUP | SEC_LINKER_CREATED)) == SEC_GROUP` is true at line 1069, the code directly assigns `output_section->contents` to `new_contents` at line 1077 without checking if it's NULL. This contrasts with the else branch (lines 1081-1086) which properly checks `if (!new_contents) goto error_return;`. This unchecked NULL pointer flows through `bfd_set_section_contents` → `_bfd_generic_set_section_contents` → `bfd_write` → `cache_bwrite`, finally reaching `fwrite(from, 1, nbytes, f)` at line 900 where the NULL pointer is dereferenced.
+
+## Trigger Path
+
+1. `bad.c:988` `default_indirect_link_order`
+   - Entry function containing the source at line 1077. In the SEC_GROUP code path, `output_section->contents` is assigned to `new_contents` without any NULL check, unlike the else branch at line 1085.
+
+2. `bad.c:954` `bfd_set_section_contents`
+   - Called at line 1092 with `new_contents` as the third argument (location). Forwards the potentially NULL pointer to `_bfd_generic_set_section_contents`.
+
+3. `bad.c:941` `_bfd_generic_set_section_contents`
+   - Called at line 948 with the NULL pointer as the first argument to `bfd_write`.
+
+4. `bad.c:911` `bfd_write`
+   - Called at line 929, forwards the pointer to `cache_bwrite`.
+
+5. `bad.c:888` `cache_bwrite`
+   - Entry function for the sink. The pointer flows through to `fwrite` at line 900.
+
+6. `bad.c:900` `fwrite`
+   - The sink operation where the NULL pointer is dereferenced (`nwrite = fwrite(from, 1, nbytes, f)`).

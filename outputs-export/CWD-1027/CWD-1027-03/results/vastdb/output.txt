@@ -1,0 +1,19 @@
+Based on my code analysis and the VAST DB queries, I now have enough information to provide the vulnerability analysis.
+
+## Root Cause
+
+The vulnerability is a CWE-401 memory leak in the `avio_alloc_context` function at line 491 of `bad.c`. An `AVIOContext` structure is allocated via `av_malloc(sizeof(AVIOContext))` but is never freed in certain error paths. Specifically, in `wtvfile_open_sector` (line 615), when `avio_alloc_context` returns a valid pointer but the caller (`read_header`) encounters an error (e.g., from `parse_chunks` at line 709, or from `avio_seek` at line 714), the function returns early without freeing the `AVIOContext` allocated at line 491. The memory remains allocated indefinitely because there is no corresponding `avio_context_free` call for this early-exit path.
+
+## Trigger Path
+
+1. `bad.c:671` `read_header`
+   - Entry point that sets up WtvContext and opens timeline file via `wtvfile_open`
+
+2. `bad.c:703` `wtvfile_open` (macro → `wtvfile_open2`)
+   - Calls `wtvfile_open_sector` to open the timeline file, receives `AVIOContext *pb`
+
+3. `bad.c:529` `wtvfile_open_sector`
+   - Allocates AVIOContext at line 615 via `avio_alloc_context(buffer, ...)`
+
+4. `bad.c:482` `avio_alloc_context`
+   - **Vulnerable operation**: Line 491 allocates `AVIOContext *s = av_malloc(sizeof(AVIOContext))` but this memory is not freed when the caller encounters errors and returns early without proper cleanup

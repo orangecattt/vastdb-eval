@@ -1,0 +1,12 @@
+{
+  "baseline": {
+    "correct": true,
+    "score": 10,
+    "reason": "Correctly identifies missing upper-bounds check on x_tagndx.l before using it as an array index into table_base in coff_pointerize_aux, traces the full trigger path from copy_file through coff_mangle_symbols sink at line 1850, and contains no unsupported speculation. Matches CVE-2018-7208, CWE-20."
+  },
+  "vastdb": {
+    "correct": true,
+    "score": 10,
+    "reason": "Correctly identifies the same root cause (missing upper-bounds validation on x_tagndx.l), source (coff_pointerize_aux), sink (coff_mangle_symbols line 1850), and trigger mechanism. All claims are accurate and no unsupported speculation present."
+  }
+}

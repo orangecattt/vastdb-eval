@@ -1,0 +1,12 @@
+{
+  "baseline": {
+    "correct": true,
+    "score": 5,
+    "reason": "Identifies the core bug (line 802 overflow check doesn't return) and CVE source/sink correctly, but trigger path is imprecise: lists bit_read_BB callers on the dat stream (lines 690,1000,1047,1048,1052) rather than the actual crash path via bit_read_CMC/str_dat chain. Misses the critical obj->has_strings guard mechanism, which is the key fix difference between bad/good."
+  },
+  "vastdb": {
+    "correct": true,
+    "score": 6,
+    "reason": "Identifies the core bug and has a more accurate trigger path that includes obj_string_stream and the str_dat corruption. Traces through the correct call chain (VIEWPORT -> obj_string_stream -> bit_advance_position(str,...) -> bit_read_BB in the string stream context). Still misses the obj->has_strings guard as the critical fix detail, but the path description is more coherent than baseline."
+  }
+}

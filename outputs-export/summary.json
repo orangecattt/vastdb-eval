@@ -1,0 +1,2284 @@
+{
+  "time": "2026-05-06T10:16:10.770502+08:00",
+  "jobs": 1,
+  "total": 100,
+  "pending": 0,
+  "ok": 100,
+  "failed": 0,
+  "statistics": {
+    "score": {
+      "evaluated": 96,
+      "skipped": 4,
+      "baseline": {
+        "correct": 64,
+        "avg_score": 7.1
+      },
+      "vastdb": {
+        "correct": 77,
+        "avg_score": 7.82
+      },
+      "vastdb_better": 84
+    },
+    "avg_duration": {
+      "baseline": "1m16s",
+      "vastdb": "3m09s",
+      "judge": "0m50s"
+    }
+  },
+  "results": [
+    {
+      "case": "CWD-1016-01",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": true,
+            "score": 9.0
+          },
+          "vastdb": {
+            "correct": true,
+            "score": 9.0
+          }
+        },
+        "duration": {
+          "baseline": "1m03s",
+          "vastdb": "3m23s",
+          "judge": "0m54s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1016-02",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": true,
+            "score": 8.0
+          },
+          "vastdb": {
+            "correct": true,
+            "score": 9.0
+          }
+        },
+        "duration": {
+          "baseline": "0m39s",
+          "vastdb": "3m03s",
+          "judge": "1m19s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1016-03",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": false,
+            "score": 0.0
+          },
+          "vastdb": {
+            "correct": false,
+            "score": 3.0
+          }
+        },
+        "duration": {
+          "baseline": "1m49s",
+          "vastdb": "6m19s",
+          "judge": "0m55s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1016-04",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": false,
+            "score": 1.0
+          },
+          "vastdb": {
+            "correct": false,
+            "score": 1.0
+          }
+        },
+        "duration": {
+          "baseline": "0m47s",
+          "vastdb": "3m36s",
+          "judge": "1m32s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1016-05",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": false,
+            "score": 4.0
+          },
+          "vastdb": {
+            "correct": true,
+            "score": 9.0
+          }
+        },
+        "duration": {
+          "baseline": "1m26s",
+          "vastdb": "2m04s",
+          "judge": "0m41s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1016-06",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": false,
+            "score": 2.0
+          },
+          "vastdb": {
+            "correct": false,
+            "score": 2.0
+          }
+        },
+        "duration": {
+          "baseline": "1m32s",
+          "vastdb": "4m34s",
+          "judge": "1m49s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1016-07",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": false,
+            "score": 3.0
+          },
+          "vastdb": {
+            "correct": true,
+            "score": 9.0
+          }
+        },
+        "duration": {
+          "baseline": "0m45s",
+          "vastdb": "4m14s",
+          "judge": "1m06s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1016-08",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": true,
+            "score": 9.0
+          },
+          "vastdb": {
+            "correct": false,
+            "score": 6.0
+          }
+        },
+        "duration": {
+          "baseline": "0m41s",
+          "vastdb": "3m43s",
+          "judge": "1m12s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1016-09",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": false,
+            "score": 2.0
+          },
+          "vastdb": {
+            "correct": false,
+            "score": 3.0
+          }
+        },
+        "duration": {
+          "baseline": "0m56s",
+          "vastdb": "6m47s",
+          "judge": "3m56s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1016-10",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": false,
+            "score": 1.0
+          },
+          "vastdb": {
+            "correct": true,
+            "score": 9.0
+          }
+        },
+        "duration": {
+          "baseline": "0m52s",
+          "vastdb": "5m01s",
+          "judge": "0m31s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1016-11",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": false,
+            "score": 2.0
+          },
+          "vastdb": {
+            "correct": false,
+            "score": 2.0
+          }
+        },
+        "duration": {
+          "baseline": "0m29s",
+          "vastdb": "9m36s",
+          "judge": "2m43s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1016-12",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": true,
+            "score": 10.0
+          },
+          "vastdb": {
+            "correct": true,
+            "score": 10.0
+          }
+        },
+        "duration": {
+          "baseline": "0m29s",
+          "vastdb": "4m13s",
+          "judge": "0m21s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1016-13",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": false,
+            "score": 1.0
+          },
+          "vastdb": {
+            "correct": true,
+            "score": 9.0
+          }
+        },
+        "duration": {
+          "baseline": "1m46s",
+          "vastdb": "9m00s",
+          "judge": "1m15s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1016-14",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": true,
+            "score": 9.0
+          },
+          "vastdb": {
+            "correct": true,
+            "score": 9.0
+          }
+        },
+        "duration": {
+          "baseline": "0m38s",
+          "vastdb": "6m34s",
+          "judge": "1m14s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1016-15",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": true,
+            "score": 9.0
+          },
+          "vastdb": {
+            "correct": true,
+            "score": 9.0
+          }
+        },
+        "duration": {
+          "baseline": "0m29s",
+          "vastdb": "1m34s",
+          "judge": "0m50s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1025-01",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": true,
+            "score": 9.0
+          },
+          "vastdb": {
+            "correct": true,
+            "score": 9.0
+          }
+        },
+        "duration": {
+          "baseline": "1m55s",
+          "vastdb": "3m28s",
+          "judge": "1m02s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1025-02",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": false,
+            "score": 1.0
+          },
+          "vastdb": {
+            "correct": false,
+            "score": 1.0
+          }
+        },
+        "duration": {
+          "baseline": "0m39s",
+          "vastdb": "4m13s",
+          "judge": "2m31s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1025-03",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": false,
+            "score": 5.0
+          },
+          "vastdb": {
+            "correct": true,
+            "score": 9.0
+          }
+        },
+        "duration": {
+          "baseline": "0m59s",
+          "vastdb": "3m08s",
+          "judge": "1m01s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1025-04",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": true,
+            "score": 9.0
+          },
+          "vastdb": {
+            "correct": false,
+            "score": 4.0
+          }
+        },
+        "duration": {
+          "baseline": "1m44s",
+          "vastdb": "3m23s",
+          "judge": "0m45s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1025-05",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": true,
+            "score": 9.0
+          },
+          "vastdb": {
+            "correct": true,
+            "score": 9.0
+          }
+        },
+        "duration": {
+          "baseline": "0m34s",
+          "vastdb": "3m06s",
+          "judge": "0m22s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1026-01",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": true,
+            "score": 9.0
+          },
+          "vastdb": {
+            "correct": true,
+            "score": 9.0
+          }
+        },
+        "duration": {
+          "baseline": "2m28s",
+          "vastdb": "1m58s",
+          "judge": "0m48s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1026-02",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": false,
+            "score": 3.0
+          },
+          "vastdb": {
+            "correct": true,
+            "score": 7.0
+          }
+        },
+        "duration": {
+          "baseline": "4m22s",
+          "vastdb": "4m13s",
+          "judge": "2m04s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1026-03",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": false,
+            "score": 3.0
+          },
+          "vastdb": {
+            "correct": true,
+            "score": 7.0
+          }
+        },
+        "duration": {
+          "baseline": "2m15s",
+          "vastdb": "2m09s",
+          "judge": "1m30s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1026-04",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": true,
+            "score": 10.0
+          },
+          "vastdb": {
+            "correct": true,
+            "score": 10.0
+          }
+        },
+        "duration": {
+          "baseline": "0m44s",
+          "vastdb": "3m38s",
+          "judge": "0m26s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1026-05",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": false,
+            "score": 2.0
+          },
+          "vastdb": {
+            "correct": true,
+            "score": 8.0
+          }
+        },
+        "duration": {
+          "baseline": "0m29s",
+          "vastdb": "2m27s",
+          "judge": "1m14s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1026-06",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": true,
+            "score": 9.0
+          },
+          "vastdb": {
+            "correct": true,
+            "score": 9.0
+          }
+        },
+        "duration": {
+          "baseline": "1m07s",
+          "vastdb": "2m29s",
+          "judge": "1m01s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1026-07",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": true,
+            "score": 7.0
+          },
+          "vastdb": {
+            "correct": true,
+            "score": 7.0
+          }
+        },
+        "duration": {
+          "baseline": "2m11s",
+          "vastdb": "2m42s",
+          "judge": "0m29s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1026-08",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": true,
+            "score": 10.0
+          },
+          "vastdb": {
+            "correct": true,
+            "score": 10.0
+          }
+        },
+        "duration": {
+          "baseline": "0m38s",
+          "vastdb": "1m22s",
+          "judge": "0m34s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1026-09",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": null,
+        "duration": {
+          "baseline": "0m50s"
+        },
+        "score_error": "missing file: /home/jialeiwang/mlir-dev/vastdb-eval/outputs/CWD-1026/CWD-1026-09/results/judge/output.json"
+      }
+    },
+    {
+      "case": "CWD-1026-10",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": false,
+            "score": 1.0
+          },
+          "vastdb": {
+            "correct": true,
+            "score": 8.0
+          }
+        },
+        "duration": {
+          "baseline": "0m53s",
+          "vastdb": "3m21s",
+          "judge": "0m40s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1026-11",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": null,
+        "duration": {},
+        "score_error": "missing file: /home/jialeiwang/mlir-dev/vastdb-eval/outputs/CWD-1026/CWD-1026-11/results/judge/output.json"
+      }
+    },
+    {
+      "case": "CWD-1026-12",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": true,
+            "score": 7.0
+          },
+          "vastdb": {
+            "correct": true,
+            "score": 9.0
+          }
+        },
+        "duration": {
+          "baseline": "0m28s",
+          "vastdb": "1m49s",
+          "judge": "1m00s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1026-13",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": null,
+        "duration": {},
+        "score_error": "missing file: /home/jialeiwang/mlir-dev/vastdb-eval/outputs/CWD-1026/CWD-1026-13/results/judge/output.json"
+      }
+    },
+    {
+      "case": "CWD-1026-14",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": null,
+        "duration": {},
+        "score_error": "missing file: /home/jialeiwang/mlir-dev/vastdb-eval/outputs/CWD-1026/CWD-1026-14/results/judge/output.json"
+      }
+    },
+    {
+      "case": "CWD-1027-01",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": true,
+            "score": 10.0
+          },
+          "vastdb": {
+            "correct": true,
+            "score": 10.0
+          }
+        },
+        "duration": {
+          "baseline": "0m26s",
+          "vastdb": "1m42s",
+          "judge": "0m23s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1027-02",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": true,
+            "score": 10.0
+          },
+          "vastdb": {
+            "correct": true,
+            "score": 10.0
+          }
+        },
+        "duration": {
+          "baseline": "1m31s",
+          "vastdb": "4m33s",
+          "judge": "0m21s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1027-03",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": false,
+            "score": 1.0
+          },
+          "vastdb": {
+            "correct": true,
+            "score": 6.0
+          }
+        },
+        "duration": {
+          "baseline": "0m47s",
+          "vastdb": "1m57s",
+          "judge": "0m44s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1027-04",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": true,
+            "score": 7.0
+          },
+          "vastdb": {
+            "correct": true,
+            "score": 7.0
+          }
+        },
+        "duration": {
+          "baseline": "2m24s",
+          "vastdb": "1m53s",
+          "judge": "0m31s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1027-05",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": true,
+            "score": 10.0
+          },
+          "vastdb": {
+            "correct": true,
+            "score": 10.0
+          }
+        },
+        "duration": {
+          "baseline": "1m25s",
+          "vastdb": "1m24s",
+          "judge": "0m31s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1027-06",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": true,
+            "score": 10.0
+          },
+          "vastdb": {
+            "correct": true,
+            "score": 10.0
+          }
+        },
+        "duration": {
+          "baseline": "2m08s",
+          "vastdb": "1m51s",
+          "judge": "0m32s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1027-07",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": true,
+            "score": 10.0
+          },
+          "vastdb": {
+            "correct": true,
+            "score": 10.0
+          }
+        },
+        "duration": {
+          "baseline": "0m34s",
+          "vastdb": "2m16s",
+          "judge": "0m26s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1027-08",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": true,
+            "score": 8.0
+          },
+          "vastdb": {
+            "correct": true,
+            "score": 8.0
+          }
+        },
+        "duration": {
+          "baseline": "1m03s",
+          "vastdb": "2m09s",
+          "judge": "0m24s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1027-09",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": true,
+            "score": 10.0
+          },
+          "vastdb": {
+            "correct": true,
+            "score": 10.0
+          }
+        },
+        "duration": {
+          "baseline": "0m39s",
+          "vastdb": "2m05s",
+          "judge": "0m27s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1027-10",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": true,
+            "score": 9.0
+          },
+          "vastdb": {
+            "correct": true,
+            "score": 8.0
+          }
+        },
+        "duration": {
+          "baseline": "1m07s",
+          "vastdb": "2m53s",
+          "judge": "0m22s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1027-11",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": true,
+            "score": 9.0
+          },
+          "vastdb": {
+            "correct": false,
+            "score": 5.0
+          }
+        },
+        "duration": {
+          "baseline": "1m41s",
+          "vastdb": "2m57s",
+          "judge": "0m41s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1027-12",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": true,
+            "score": 9.0
+          },
+          "vastdb": {
+            "correct": true,
+            "score": 9.0
+          }
+        },
+        "duration": {
+          "baseline": "0m39s",
+          "vastdb": "3m14s",
+          "judge": "0m28s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1027-13",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": true,
+            "score": 8.0
+          },
+          "vastdb": {
+            "correct": true,
+            "score": 8.0
+          }
+        },
+        "duration": {
+          "baseline": "0m43s",
+          "vastdb": "3m58s",
+          "judge": "0m24s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1028-01",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": true,
+            "score": 8.0
+          },
+          "vastdb": {
+            "correct": true,
+            "score": 9.0
+          }
+        },
+        "duration": {
+          "baseline": "0m32s",
+          "vastdb": "2m56s",
+          "judge": "0m43s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1028-02",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": true,
+            "score": 8.0
+          },
+          "vastdb": {
+            "correct": false,
+            "score": 2.0
+          }
+        },
+        "duration": {
+          "baseline": "0m38s",
+          "vastdb": "2m18s",
+          "judge": "0m45s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1028-03",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": true,
+            "score": 5.0
+          },
+          "vastdb": {
+            "correct": true,
+            "score": 6.0
+          }
+        },
+        "duration": {
+          "baseline": "2m10s",
+          "vastdb": "2m32s",
+          "judge": "0m41s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1029-01",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": true,
+            "score": 10.0
+          },
+          "vastdb": {
+            "correct": true,
+            "score": 10.0
+          }
+        },
+        "duration": {
+          "baseline": "2m54s",
+          "vastdb": "2m53s",
+          "judge": "0m33s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1029-02",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": true,
+            "score": 10.0
+          },
+          "vastdb": {
+            "correct": true,
+            "score": 10.0
+          }
+        },
+        "duration": {
+          "baseline": "1m06s",
+          "vastdb": "2m54s",
+          "judge": "0m35s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1030-01",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": false,
+            "score": 5.0
+          },
+          "vastdb": {
+            "correct": true,
+            "score": 9.0
+          }
+        },
+        "duration": {
+          "baseline": "0m30s",
+          "vastdb": "2m27s",
+          "judge": "0m45s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1030-02",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": true,
+            "score": 10.0
+          },
+          "vastdb": {
+            "correct": true,
+            "score": 10.0
+          }
+        },
+        "duration": {
+          "baseline": "1m56s",
+          "vastdb": "1m14s",
+          "judge": "0m16s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1030-03",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": true,
+            "score": 9.0
+          },
+          "vastdb": {
+            "correct": false,
+            "score": 0.0
+          }
+        },
+        "duration": {
+          "baseline": "0m36s",
+          "vastdb": "0m49s",
+          "judge": "0m45s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1031-01",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": true,
+            "score": 9.0
+          },
+          "vastdb": {
+            "correct": true,
+            "score": 9.0
+          }
+        },
+        "duration": {
+          "baseline": "1m00s",
+          "vastdb": "4m00s",
+          "judge": "0m58s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1031-02",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": false,
+            "score": 3.0
+          },
+          "vastdb": {
+            "correct": true,
+            "score": 7.0
+          }
+        },
+        "duration": {
+          "baseline": "0m29s",
+          "vastdb": "3m55s",
+          "judge": "1m45s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1031-03",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": true,
+            "score": 10.0
+          },
+          "vastdb": {
+            "correct": true,
+            "score": 10.0
+          }
+        },
+        "duration": {
+          "baseline": "0m56s",
+          "vastdb": "2m06s",
+          "judge": "0m27s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1031-04",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": true,
+            "score": 10.0
+          },
+          "vastdb": {
+            "correct": true,
+            "score": 10.0
+          }
+        },
+        "duration": {
+          "baseline": "0m43s",
+          "vastdb": "2m41s",
+          "judge": "0m29s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1031-05",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": false,
+            "score": 5.0
+          },
+          "vastdb": {
+            "correct": false,
+            "score": 5.0
+          }
+        },
+        "duration": {
+          "baseline": "0m49s",
+          "vastdb": "2m17s",
+          "judge": "1m53s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1031-06",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": true,
+            "score": 9.0
+          },
+          "vastdb": {
+            "correct": true,
+            "score": 10.0
+          }
+        },
+        "duration": {
+          "baseline": "0m29s",
+          "vastdb": "2m28s",
+          "judge": "0m26s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1031-07",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": false,
+            "score": 3.0
+          },
+          "vastdb": {
+            "correct": true,
+            "score": 8.0
+          }
+        },
+        "duration": {
+          "baseline": "0m44s",
+          "vastdb": "3m09s",
+          "judge": "1m12s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1031-08",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": true,
+            "score": 10.0
+          },
+          "vastdb": {
+            "correct": true,
+            "score": 10.0
+          }
+        },
+        "duration": {
+          "baseline": "0m30s",
+          "vastdb": "2m35s",
+          "judge": "0m28s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1031-09",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": true,
+            "score": 9.0
+          },
+          "vastdb": {
+            "correct": true,
+            "score": 9.0
+          }
+        },
+        "duration": {
+          "baseline": "1m02s",
+          "vastdb": "3m03s",
+          "judge": "0m33s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1031-10",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": false,
+            "score": 6.0
+          },
+          "vastdb": {
+            "correct": false,
+            "score": 6.0
+          }
+        },
+        "duration": {
+          "baseline": "0m43s",
+          "vastdb": "3m16s",
+          "judge": "1m32s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1031-11",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": false,
+            "score": 5.0
+          },
+          "vastdb": {
+            "correct": false,
+            "score": 6.0
+          }
+        },
+        "duration": {
+          "baseline": "1m18s",
+          "vastdb": "2m23s",
+          "judge": "0m35s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1031-12",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": true,
+            "score": 10.0
+          },
+          "vastdb": {
+            "correct": true,
+            "score": 10.0
+          }
+        },
+        "duration": {
+          "baseline": "1m25s",
+          "vastdb": "2m35s",
+          "judge": "0m19s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1031-13",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": true,
+            "score": 9.0
+          },
+          "vastdb": {
+            "correct": false,
+            "score": 0.0
+          }
+        },
+        "duration": {
+          "baseline": "2m23s",
+          "vastdb": "2m47s",
+          "judge": "0m37s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1031-14",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": false,
+            "score": 5.0
+          },
+          "vastdb": {
+            "correct": false,
+            "score": 7.0
+          }
+        },
+        "duration": {
+          "baseline": "3m28s",
+          "vastdb": "4m13s",
+          "judge": "2m08s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1031-15",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": false,
+            "score": 3.0
+          },
+          "vastdb": {
+            "correct": true,
+            "score": 7.0
+          }
+        },
+        "duration": {
+          "baseline": "0m37s",
+          "vastdb": "2m03s",
+          "judge": "0m59s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1031-16",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": false,
+            "score": 2.0
+          },
+          "vastdb": {
+            "correct": true,
+            "score": 7.0
+          }
+        },
+        "duration": {
+          "baseline": "1m23s",
+          "vastdb": "3m25s",
+          "judge": "1m34s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1031-17",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": true,
+            "score": 10.0
+          },
+          "vastdb": {
+            "correct": true,
+            "score": 10.0
+          }
+        },
+        "duration": {
+          "baseline": "2m46s",
+          "vastdb": "2m51s",
+          "judge": "0m28s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1031-18",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": true,
+            "score": 9.0
+          },
+          "vastdb": {
+            "correct": true,
+            "score": 8.0
+          }
+        },
+        "duration": {
+          "baseline": "1m31s",
+          "vastdb": "2m21s",
+          "judge": "0m32s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1031-19",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": true,
+            "score": 9.0
+          },
+          "vastdb": {
+            "correct": true,
+            "score": 9.0
+          }
+        },
+        "duration": {
+          "baseline": "0m34s",
+          "vastdb": "2m24s",
+          "judge": "0m32s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1031-20",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": true,
+            "score": 10.0
+          },
+          "vastdb": {
+            "correct": true,
+            "score": 10.0
+          }
+        },
+        "duration": {
+          "baseline": "3m20s",
+          "vastdb": "2m43s",
+          "judge": "0m29s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1031-21",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": true,
+            "score": 10.0
+          },
+          "vastdb": {
+            "correct": true,
+            "score": 10.0
+          }
+        },
+        "duration": {
+          "baseline": "0m28s",
+          "vastdb": "2m58s",
+          "judge": "0m32s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1031-22",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": true,
+            "score": 9.0
+          },
+          "vastdb": {
+            "correct": true,
+            "score": 7.0
+          }
+        },
+        "duration": {
+          "baseline": "1m41s",
+          "vastdb": "2m33s",
+          "judge": "0m28s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1031-23",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": true,
+            "score": 9.0
+          },
+          "vastdb": {
+            "correct": true,
+            "score": 9.0
+          }
+        },
+        "duration": {
+          "baseline": "0m32s",
+          "vastdb": "2m45s",
+          "judge": "0m28s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1031-24",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": true,
+            "score": 10.0
+          },
+          "vastdb": {
+            "correct": true,
+            "score": 10.0
+          }
+        },
+        "duration": {
+          "baseline": "0m44s",
+          "vastdb": "2m29s",
+          "judge": "0m41s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1031-25",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": true,
+            "score": 10.0
+          },
+          "vastdb": {
+            "correct": true,
+            "score": 10.0
+          }
+        },
+        "duration": {
+          "baseline": "1m25s",
+          "vastdb": "2m30s",
+          "judge": "0m20s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1031-26",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": true,
+            "score": 9.0
+          },
+          "vastdb": {
+            "correct": true,
+            "score": 9.0
+          }
+        },
+        "duration": {
+          "baseline": "0m36s",
+          "vastdb": "2m46s",
+          "judge": "0m27s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1031-27",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": true,
+            "score": 10.0
+          },
+          "vastdb": {
+            "correct": true,
+            "score": 10.0
+          }
+        },
+        "duration": {
+          "baseline": "0m32s",
+          "vastdb": "4m15s",
+          "judge": "0m39s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1031-28",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": true,
+            "score": 10.0
+          },
+          "vastdb": {
+            "correct": true,
+            "score": 10.0
+          }
+        },
+        "duration": {
+          "baseline": "1m29s",
+          "vastdb": "1m33s",
+          "judge": "0m19s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1031-29",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": false,
+            "score": 7.0
+          },
+          "vastdb": {
+            "correct": false,
+            "score": 0.0
+          }
+        },
+        "duration": {
+          "baseline": "0m49s",
+          "vastdb": "1m43s",
+          "judge": "0m48s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1031-30",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": false,
+            "score": 2.0
+          },
+          "vastdb": {
+            "correct": true,
+            "score": 8.0
+          }
+        },
+        "duration": {
+          "baseline": "0m45s",
+          "vastdb": "2m28s",
+          "judge": "0m38s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1031-31",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": false,
+            "score": 5.0
+          },
+          "vastdb": {
+            "correct": false,
+            "score": 4.0
+          }
+        },
+        "duration": {
+          "baseline": "0m30s",
+          "vastdb": "3m28s",
+          "judge": "1m58s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1031-32",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": true,
+            "score": 10.0
+          },
+          "vastdb": {
+            "correct": true,
+            "score": 10.0
+          }
+        },
+        "duration": {
+          "baseline": "0m22s",
+          "vastdb": "2m28s",
+          "judge": "0m22s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1031-33",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": true,
+            "score": 6.0
+          },
+          "vastdb": {
+            "correct": true,
+            "score": 9.0
+          }
+        },
+        "duration": {
+          "baseline": "1m33s",
+          "vastdb": "3m40s",
+          "judge": "0m17s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1031-34",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": false,
+            "score": 2.0
+          },
+          "vastdb": {
+            "correct": true,
+            "score": 8.0
+          }
+        },
+        "duration": {
+          "baseline": "3m35s",
+          "vastdb": "4m13s",
+          "judge": "0m47s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1031-35",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": false,
+            "score": 4.0
+          },
+          "vastdb": {
+            "correct": true,
+            "score": 9.0
+          }
+        },
+        "duration": {
+          "baseline": "3m39s",
+          "vastdb": "4m27s",
+          "judge": "0m54s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1031-36",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": true,
+            "score": 7.0
+          },
+          "vastdb": {
+            "correct": true,
+            "score": 8.0
+          }
+        },
+        "duration": {
+          "baseline": "3m05s",
+          "vastdb": "2m39s",
+          "judge": "0m41s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1031-37",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": true,
+            "score": 9.0
+          },
+          "vastdb": {
+            "correct": true,
+            "score": 9.0
+          }
+        },
+        "duration": {
+          "baseline": "0m38s",
+          "vastdb": "2m13s",
+          "judge": "0m27s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1031-38",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": true,
+            "score": 9.0
+          },
+          "vastdb": {
+            "correct": true,
+            "score": 10.0
+          }
+        },
+        "duration": {
+          "baseline": "1m03s",
+          "vastdb": "3m08s",
+          "judge": "0m39s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1031-39",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": false,
+            "score": 5.0
+          },
+          "vastdb": {
+            "correct": true,
+            "score": 9.0
+          }
+        },
+        "duration": {
+          "baseline": "0m38s",
+          "vastdb": "2m37s",
+          "judge": "0m41s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1031-40",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": true,
+            "score": 8.0
+          },
+          "vastdb": {
+            "correct": true,
+            "score": 7.0
+          }
+        },
+        "duration": {
+          "baseline": "0m42s",
+          "vastdb": "2m59s",
+          "judge": "0m32s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1031-41",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": true,
+            "score": 9.0
+          },
+          "vastdb": {
+            "correct": true,
+            "score": 9.0
+          }
+        },
+        "duration": {
+          "baseline": "2m15s",
+          "vastdb": "2m21s",
+          "judge": "0m34s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1031-42",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": true,
+            "score": 10.0
+          },
+          "vastdb": {
+            "correct": true,
+            "score": 10.0
+          }
+        },
+        "duration": {
+          "baseline": "4m13s",
+          "vastdb": "4m48s",
+          "judge": "0m38s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1031-43",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": true,
+            "score": 10.0
+          },
+          "vastdb": {
+            "correct": true,
+            "score": 10.0
+          }
+        },
+        "duration": {
+          "baseline": "0m51s",
+          "vastdb": "4m04s",
+          "judge": "0m39s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1031-44",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": true,
+            "score": 10.0
+          },
+          "vastdb": {
+            "correct": true,
+            "score": 10.0
+          }
+        },
+        "duration": {
+          "baseline": "2m15s",
+          "vastdb": "3m46s",
+          "judge": "0m33s"
+        }
+      }
+    },
+    {
+      "case": "CWD-1039-01",
+      "ok": true,
+      "stage": null,
+      "error": null,
+      "statistics": {
+        "score": {
+          "baseline": {
+            "correct": false,
+            "score": 6.0
+          },
+          "vastdb": {
+            "correct": false,
+            "score": 6.0
+          }
+        },
+        "duration": {
+          "baseline": "1m03s",
+          "vastdb": "3m34s",
+          "judge": "0m36s"
+        }
+      }
+    }
+  ]
+}

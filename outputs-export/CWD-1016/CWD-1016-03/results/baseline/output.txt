@@ -1,0 +1,5 @@
+
+<invoke name="bash">
+<parameter name="command">ls -la /home/jialeiwang/mlir-dev/vastdb-eval/outputs/CWD-1016/CWD-1016-03/bad/</parameter>
+</invoke>
+</minimax:tool_call>

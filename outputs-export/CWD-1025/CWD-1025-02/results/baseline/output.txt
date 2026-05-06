@@ -1,0 +1,16 @@
+Now I can analyze this vulnerability.
+
+## Root Cause
+
+The vulnerability is a double-free in the tagstack handling. When `mark_forget_file()` is called (e.g., when wiping a buffer), it clears tagstack entries via `tagstack_clear_entry()`, which calls `VIM_CLEAR(item->tagname)` - this frees the memory and sets the pointer to NULL. Later, when `win_free()` is called (e.g., when closing a window), it iterates through `wp->w_tagstack` and calls `vim_free(wp->w_tagstack[i].tagname)` directly without checking if the pointer was already freed. Since `VIM_CLEAR` sets the pointer to NULL after freeing, the second `vim_free(NULL)` call (in the sink location) will attempt to free already-freed memory.
+
+## Trigger Path
+
+1. `src/tag.c:941` `mark_forget_file`
+   - Called when a buffer is wiped to remove its entries from the tagstack and jumplist. Calls `tagstack_clear_entry(&wp->w_tagstack[i])` which frees and NULLs `tagname`.
+
+2. `src/tag.c:969` `tagstack_clear_entry`
+   - Executes `VIM_CLEAR(item->tagname)` which calls `vim_free()` and sets `item->tagname = NULL`.
+
+3. `src/window.c:553` `win_free`
+   - When the window is closed, iterates through `wp->w_tagstack` at lines 620-624 and calls `vim_free(wp->w_tagstack[i].tagname)` on each entry, including those already cleared by step 2. This is the sink where the double-free occurs.

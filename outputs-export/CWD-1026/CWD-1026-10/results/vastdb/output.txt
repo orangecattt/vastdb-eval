@@ -1,0 +1,28 @@
+Based on my analysis of the code and the VAST DB query results, I can now provide the final explanation:
+
+## Root Cause
+
+The vulnerability is a Use-After-Free (CWE-416). The `qualified_name` pointer is allocated by `make_qualified_name()` at line 498 and assigned to `filedata->file_name` at line 575. After `process_object(filedata)` is called at line 576, the memory is freed at line 587 via `free(qualified_name)`. However, the `filedata` structure was passed into `process_archive` from the caller, so `filedata->file_name` still points to the freed memory. On the next loop iteration, when `fseek` fails at line 462, `error()` is called at line 464 with `filedata->file_name` as an argument. Inside `error()` at line 130, `vfprintf(stderr, message, args)` dereferences this dangling pointer, causing the use-after-free.
+
+## Trigger Path
+
+1. `bad.c:338` `process_archive`
+   - Entry function that processes archive files. Receives `filedata` pointer from caller.
+
+2. `bad.c:575` (inside `process_archive` while loop)
+   - Assigns `qualified_name` (allocated by `make_qualified_name` at line 498) to `filedata->file_name`.
+
+3. `bad.c:576` `process_object`
+   - Calls `process_object(filedata)` which may internally call `error()`.
+
+4. `bad.c:587` `free`
+   - After `process_object` returns, calls `free(qualified_name)`, freeing the memory that `filedata->file_name` still points to.
+
+5. `bad.c:462` `fseek`
+   - Loop continues to next iteration. Attempts to seek to next archive header. Can fail if archive is corrupted.
+
+6. `bad.c:464` `error`
+   - If fseek fails, calls `error()` with `filedata->file_name` as argument.
+
+7. `bad.c:130` `vfprintf` (sink)
+   - Inside `error()` function, `vfprintf(stderr, message, args)` dereferences the freed pointer, causing the use-after-free.

@@ -1,0 +1,22 @@
+Now I have the full picture. Let me provide the final analysis:
+
+## Root Cause
+
+The vulnerability is a CWE-476 Null Pointer Dereference. In `gf_m2ts_process_pmt`, the `pmt->program->pmt_iod` field can be set to NULL in multiple code paths (lines 402, 408, 417) when processing MPEG-4 IOD descriptors - specifically when the IOD descriptor has an incorrect tag or when the IOD contains no ESDescriptors. Later, in `m2tsdmx_declare_pid` (line 1428), when handling MPEG4 stream types, the code dereferences `stream->program->pmt_iod->ESDescriptors` without checking if `pmt_iod` is NULL, causing a null pointer dereference.
+
+## Trigger Path
+
+1. `bad.c:342` `gf_m2ts_process_pmt`
+   - Parses PMT section data; may set `pmt->program->pmt_iod = NULL` at lines 402, 408, or 417 based on IOD descriptor parsing results
+
+2. `bad.c:989` in `gf_m2ts_process_pmt`
+   - Calls `ts->on_event(ts, evt_type, pmt->program)` to dispatch PMT event to registered callback
+
+3. `bad.c:996` `m2tsdmx_on_event`
+   - Registered event handler; calls `m2tsdmx_setup_program(ctx, param)` at lines 1016 (PMT_FOUND) and 1028 (PMT_UPDATE)
+
+4. `bad.c:1243` `m2tsdmx_setup_program`
+   - Iterates program streams; calls `m2tsdmx_declare_pid(ctx, (GF_M2TS_PES *)es, NULL)` at line 1266 for each stream
+
+5. `bad.c:1276` `m2tsdmx_declare_pid`
+   - For GF_M2TS_SYSTEMS_MPEG4_PES/SECTIONS stream types (lines 1422-1438), accesses `stream->program->pmt_iod->ESDescriptors` at line 1428 without null check, triggering the null pointer dereference

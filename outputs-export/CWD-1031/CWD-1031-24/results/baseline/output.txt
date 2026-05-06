@@ -1,0 +1,17 @@
+## Root Cause
+
+The vulnerability is in `r_bin_ne_get_segments` at line 344. The function checks if `bin` and `bin->segment_entries` are non-NULL (lines 340-342), but it does NOT check if `bin->ne_header` is NULL. When `bin->ne_header` is NULL, accessing `bin->ne_header->SegCount` dereferences a NULL pointer, causing CWE-476. The caller `r_bin_ne_get_symbols` and `r_bin_ne_get_entrypoints` also access `bin->ne_header` without checking for NULL, propagating the unsafe object.
+
+## Trigger Path
+
+1. `bad.c:523` `symbols(RBinFile *bf)`
+   - Entry point; calls `r_bin_ne_get_symbols(bf->bo->bin_obj)` where `bin_obj` is a `void*` cast to `r_bin_ne_obj_t*`
+
+2. `bad.c:450` `r_bin_ne_get_symbols(r_bin_ne_obj_t *bin)`
+   - Accesses `bin->ne_header->ResidNamTable` at line 452 without NULL check; calls `r_bin_ne_get_entrypoints(bin)` at line 457
+
+3. `bad.c:364` `r_bin_ne_get_entrypoints(r_bin_ne_obj_t *bin)`
+   - Accesses `bin->ne_header->csEntryPoint` at line 377 without NULL check; calls `r_bin_ne_get_segments(bin)` at line 372
+
+4. `bad.c:338` `r_bin_ne_get_segments(r_bin_ne_obj_t *bin)`
+   - Checks `bin` and `bin->segment_entries` for NULL (lines 340-342) but **not** `bin->ne_header`; dereferences NULL via `bin->ne_header->SegCount` at line 344, triggering the vulnerability
