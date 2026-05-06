@@ -1,0 +1,12 @@
+{
+  "baseline": {
+    "correct": true,
+    "score": 8,
+    "reason": "Correctly identifies the struct copy (dat1 = *hdl_dat) preserving a chain pointer that becomes stale after realloc moves the buffer. Minor imprecision: describes bit_chain_free (line 551) as the free creating the dangling pointer, when realloc (line 456) already freed it — the UAF read occurs during the earlier bit_copy_chain call."
+  },
+  "vastdb": {
+    "correct": true,
+    "score": 8,
+    "reason": "Correctly identifies the buffer reallocation without pointer update mechanism, and traces the trigger path from START_HANDLE_STREAM through obj_flush_hdlstream to bit_copy_chain and bit_read_RC. Same minor imprecision as baseline about the free timing (bit_chain_free vs realloc). Concise and accurate."
+  }
+}
