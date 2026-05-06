@@ -276,7 +276,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "targets",
         nargs="+",
-        help="'all', 'fail', 'negative', CWD-ID, or CWD-ID plus ID/range",
+        help="'all', 'fail', 'negative', CWD-ID, or CWD-ID plus ID/range; multiple targets are unioned",
     )
     parser.add_argument("--jobs", type=int, default=1, help="number of test cases to run concurrently")
     return parser.parse_args()
