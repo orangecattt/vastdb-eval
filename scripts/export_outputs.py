@@ -102,17 +102,17 @@ def remove_path(path: Path) -> bool:
     return True
 
 
-def top_level_file_removals(root: Path) -> list[Path]:
+def top_level_removals(root: Path) -> list[Path]:
     return sorted(
         path
         for path in root.iterdir()
-        if (path.is_file() or path.is_symlink()) and path.name not in TOP_LEVEL_KEEP_FILENAMES
+        if not (path.name in TOP_LEVEL_KEEP_FILENAMES or path.name.startswith("CWD-"))
     )
 
 
 def plan_removals(root: Path, keep_judge_log: bool = False) -> tuple[list[Path], int]:
     cases = testcase_dirs(root)
-    removals: list[Path] = top_level_file_removals(root)
+    removals: list[Path] = top_level_removals(root)
     for case in cases:
         for path in sorted(case.iterdir()):
             if path.name not in KEEP_TESTCASE_ENTRY_NAMES:
