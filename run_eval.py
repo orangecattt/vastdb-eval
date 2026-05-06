@@ -1231,7 +1231,7 @@ def parse_json_lenient(text: str) -> Any:
         start = stripped.find("{")
         end = stripped.rfind("}")
         if start == -1 or end == -1 or end <= start:
-            raise
+            raise json.JSONDecodeError("no JSON object found", stripped, 0)
         return json.loads(stripped[start : end + 1])
 
 
@@ -1262,7 +1262,7 @@ def nested_judge_output_from_stage_fields(data: dict[str, Any], stage: str) -> d
         try:
             parsed = parse_json_lenient(nested)
         except json.JSONDecodeError as exc:
-            parsed = parse_stage_string_with_sibling(key, nested)
+            parsed = parse_stage_entry_string(key, nested)
             if parsed is None:
                 raise EvalError(stage, f"judge output {key} field is not valid JSON: {exc}") from exc
         if isinstance(parsed, dict) and isinstance(parsed.get("baseline"), dict) and isinstance(parsed.get("vastdb"), dict):
@@ -1278,6 +1278,25 @@ def is_judge_stage_entry(data: dict[str, Any]) -> bool:
     return isinstance(data.get("correct"), bool) and isinstance(data.get("score"), (int, float))
 
 
+def parse_stage_entry_string(key: str, text: str) -> dict[str, Any] | None:
+    for candidate in stage_entry_candidates(text):
+        try:
+            parsed = parse_json_lenient(candidate)
+        except json.JSONDecodeError:
+            continue
+        if isinstance(parsed, dict) and is_judge_stage_entry(parsed):
+            return parsed
+    return parse_stage_string_with_sibling(key, text)
+
+
+def stage_entry_candidates(text: str) -> list[str]:
+    stripped = text.strip()
+    candidates = [stripped]
+    if stripped.startswith("{") and not stripped.endswith("}"):
+        candidates.append(stripped + "}")
+    return candidates
+
+
 def parse_stage_string_with_sibling(key: str, text: str) -> dict[str, Any] | None:
     stripped = text.strip()
     try:
@@ -1290,8 +1309,12 @@ def parse_stage_string_with_sibling(key: str, text: str) -> dict[str, Any] | Non
     remainder = stripped[offset:].strip()
     if not remainder.startswith(","):
         return None
+    sibling_text = remainder[1:].strip()
     try:
-        sibling = parse_json_lenient("{" + remainder[1:].strip())
+        if sibling_text.startswith("{"):
+            sibling = parse_json_lenient(sibling_text)
+        else:
+            sibling = parse_json_lenient("{" + sibling_text)
     except json.JSONDecodeError:
         return None
     if not isinstance(sibling, dict):
